@@ -121,9 +121,9 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 25px;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -598,7 +598,7 @@
         // Load and process CSV
         async function loadData() {
             try {
-                const response = await fetch('../2026 RC 2025.csv');
+                const response = await fetch('2026 RC 2025.csv');
                 const csvText = await response.text();
                 
                 Papa.parse(csvText, {
