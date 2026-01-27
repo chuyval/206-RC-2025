@@ -796,7 +796,7 @@
         // Load and process CSV
         async function loadData() {
             try {
-                const response = await fetch('../2026 RC 2025.csv');
+                const response = await fetch('2026 RC 2025.csv');
                 const csvText = await response.text();
                 
                 Papa.parse(csvText, {
