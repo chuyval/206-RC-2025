@@ -21,6 +21,11 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -76,13 +81,23 @@
         }
 
         select, input {
-            padding: 10px 15px;
+            padding: 12px 15px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             background: rgba(255, 255, 255, 0.1);
             color: #eaeaea;
-            font-size: 1rem;
+            font-size: 16px; /* Prevents iOS zoom on focus */
             min-width: 150px;
+            min-height: 44px; /* Touch-friendly target size */
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23eaeaea' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
         }
 
         select:focus, input:focus {
@@ -121,9 +136,9 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 25px;
-            max-width: 1600px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -168,6 +183,7 @@
         .leaderboard-container {
             max-height: 400px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .leaderboard-item {
@@ -209,6 +225,7 @@
         .mini-leaderboard {
             max-height: 300px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .mini-leader-item {
@@ -299,17 +316,209 @@
             color: #94a3b8;
         }
 
-        @media (max-width: 768px) {
+        /* Tablet landscape */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                max-width: 100%;
+                padding: 0 15px;
+            }
+        }
+
+        /* Tablet portrait */
+        @media (max-width: 900px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
             
             .header h1 {
-                font-size: 1.8rem;
+                font-size: 2rem;
+            }
+            
+            .stats-bar {
+                gap: 15px;
+            }
+            
+            .stat-item {
+                padding: 15px 20px;
+                min-width: 100px;
+            }
+            
+            .stat-value {
+                font-size: 1.6rem;
+            }
+            
+            .controls {
+                padding: 15px;
+                gap: 15px;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .header p {
+                font-size: 0.95rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                max-width: 100%;
+            }
+            
+            .control-group {
+                width: 100%;
+            }
+            
+            select, input {
+                width: 100%;
+                min-width: unset;
+            }
+            
+            .stats-bar {
+                gap: 10px;
+                justify-content: space-around;
+            }
+            
+            .stat-item {
+                padding: 12px 15px;
+                min-width: 70px;
+                flex: 1;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .stat-label {
+                font-size: 0.75rem;
+            }
+            
+            .dashboard-grid {
+                gap: 12px;
+                padding: 0 5px;
+            }
+            
+            .card {
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .card-title {
+                font-size: 1rem;
+            }
+            
+            .card-description {
+                font-size: 0.8rem;
             }
             
             .chart-container {
-                height: 300px;
+                height: 280px;
+            }
+            
+            .chart-container.tall {
+                height: 400px;
+            }
+            
+            .chart-container[style*="450px"] {
+                height: 350px !important;
+            }
+            
+            .leaderboard-container {
+                max-height: 350px;
+            }
+            
+            .leaderboard-item {
+                padding: 10px 12px;
+            }
+            
+            .leaderboard-rank {
+                font-size: 1.2rem;
+                width: 40px;
+            }
+            
+            .leaderboard-name {
+                font-size: 0.95rem;
+            }
+            
+            .leaderboard-stats .rate {
+                font-size: 1rem;
+            }
+            
+            .mini-leaderboard {
+                max-height: 250px;
+            }
+            
+            .mini-leader-item {
+                padding: 8px 10px;
+            }
+            
+            .mini-leader-rank {
+                font-size: 1.1rem;
+                width: 35px;
+            }
+            
+            .legend-section {
+                padding: 15px;
+                margin: 20px 10px;
+            }
+            
+            .legend-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .legend-item {
+                font-size: 0.8rem;
+            }
+            
+            .legend-icon {
+                font-size: 1.1rem;
+            }
+            
+            .footer {
+                padding: 20px 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Very small phones */
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .stats-bar {
+                flex-wrap: wrap;
+            }
+            
+            .stat-item {
+                flex: 1 1 40%;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .chart-container.tall {
+                height: 350px;
+            }
+            
+            .legend-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -440,17 +649,6 @@
             <p class="card-description">How consistently members show up (higher = more consistent).</p>
             <div class="chart-container tall">
                 <canvas id="consistencyChart"></canvas>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <span class="card-icon">💸</span>
-                <span class="card-title">Missed Runs by Member</span>
-            </div>
-            <p class="card-description">Total weeks each member did not complete the 3-mile run.</p>
-            <div class="chart-container tall">
-                <canvas id="missedChart"></canvas>
             </div>
         </div>
 
@@ -598,7 +796,7 @@
         // Load and process CSV
         async function loadData() {
             try {
-                const response = await fetch('2026 RC 2025.csv');
+                const response = await fetch('../2026 RC 2025.csv');
                 const csvText = await response.text();
                 
                 Papa.parse(csvText, {
@@ -1393,69 +1591,6 @@
             });
         }
 
-        // Render missed runs chart
-        function renderMissedChart(data) {
-            const ctx = document.getElementById('missedChart').getContext('2d');
-            
-            if (charts.missed) charts.missed.destroy();
-
-            const names = [...new Set(data.map(d => d.name))];
-            
-            const missedStats = names.map(name => {
-                const memberData = data.filter(d => d.name === name);
-                const missed = memberData.filter(d => d.status === 'Did Not Complete').length;
-                const activeWeeks = memberData.filter(d => 
-                    ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'].includes(d.status)
-                ).length;
-                return { name, missed, activeWeeks };
-            });
-            sortByPreference(missedStats, 'missed', true);
-
-            charts.missed = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: missedStats.map(s => s.name),
-                    datasets: [{
-                        label: 'Missed Runs',
-                        data: missedStats.map(s => s.missed),
-                        backgroundColor: missedStats.map(s => {
-                            // More red for more missed
-                            const intensity = Math.min(s.missed / 30, 1);
-                            return `rgba(239, 68, 68, ${0.4 + intensity * 0.5})`;
-                        }),
-                        borderColor: '#ef4444',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const s = missedStats[ctx.dataIndex];
-                                    return `${s.missed} missed out of ${s.activeWeeks} active weeks`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#eaeaea' }
-                        }
-                    }
-                }
-            });
-        }
-
         // Render money pot tracker
         function renderPotChart(data) {
             const ctx = document.getElementById('potChart').getContext('2d');
@@ -1868,7 +2003,6 @@
             renderStatusChart(filteredData);
             renderHeatmapChart(filteredData);
             renderMonthlyChart(filteredData);
-            renderMissedChart(filteredData);
             renderTimelineChart(processedData); // Timeline always uses full data
             renderPotChart(filteredData);
             renderConsistencyChart(filteredData);
