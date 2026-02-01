@@ -272,6 +272,14 @@
             grid-column: 1 / -1;
         }
 
+        .time-period-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto 25px auto;
+        }
+
         .legend-section {
             max-width: 700px;
             margin: 30px auto;
@@ -322,6 +330,11 @@
                 max-width: 100%;
                 padding: 0 15px;
             }
+            
+            .time-period-row {
+                max-width: 100%;
+                padding: 0 15px;
+            }
         }
 
         /* Tablet portrait */
@@ -329,6 +342,12 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
+            }
+            
+            .time-period-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
             }
             
             .header h1 {
@@ -358,6 +377,10 @@
         @media (max-width: 600px) {
             body {
                 padding: 10px;
+            }
+            
+            .time-period-row {
+                grid-template-columns: 1fr;
             }
             
             .header {
@@ -576,6 +599,45 @@
         </div>
     </div>
 
+    <!-- Time-Period Summary Row (3 columns) -->
+    <div class="time-period-row">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📅</span>
+                <span class="card-title">Last Week</span>
+            </div>
+            <p class="card-description">Members who completed last week's run.</p>
+            <div class="mini-leaderboard" id="lastWeekLeaderboard"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">🗓️</span>
+                <span class="card-title">Last Month</span>
+            </div>
+            <p class="card-description">Completion rate for the past 4 weeks.</p>
+            <div class="mini-leaderboard" id="lastMonthLeaderboard"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📊</span>
+                <span class="card-title">Last Quarter</span>
+            </div>
+            <p class="card-description">Completion rate for the past 12 weeks.</p>
+            <div class="mini-leaderboard" id="lastQuarterLeaderboard"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📆</span>
+                <span class="card-title">Last Year</span>
+            </div>
+            <p class="card-description">Completion rate for the past 12 months.</p>
+            <div class="mini-leaderboard" id="lastYearLeaderboard"></div>
+        </div>
+    </div>
+
     <div class="dashboard-grid">
         <!-- Row 1: Leaderboard, Completion Rate -->
         <div class="card">
@@ -649,6 +711,17 @@
             <p class="card-description">How consistently members show up (higher = more consistent).</p>
             <div class="chart-container tall">
                 <canvas id="consistencyChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">💸</span>
+                <span class="card-title">Missed Runs by Member</span>
+            </div>
+            <p class="card-description">Total weeks each member did not complete the 3-mile run.</p>
+            <div class="chart-container tall">
+                <canvas id="missedChart"></canvas>
             </div>
         </div>
 
@@ -765,11 +838,11 @@
         function categorizeStatus(status) {
             if (!status || status.trim() === '') return 'No Data';
             status = status.trim();
-            if (status === '✅' || status === '✅ ') return 'Ran 3mi';
+            if (status.startsWith('✅')) return 'Ran 3mi';
             if (status === '❌' || status === '💔') return 'Did Not Complete';
-            if (status === '♿️') return 'Injured';
-            if (status === '⛷️') return 'Working';
-            if (status === '🆓') return 'Free Pass';
+            if (status.startsWith('♿️') || status.startsWith('♿')) return 'Injured';
+            if (status.startsWith('⛷️') || status.startsWith('⛷')) return 'Working';
+            if (status.startsWith('🆓')) return 'Free Pass';
             if (status === '-') return 'Not Member';
             return 'No Data';
         }
@@ -796,7 +869,11 @@
         // Load and process CSV
         async function loadData() {
             try {
-                const response = await fetch('2026 RC 2025.csv');
+                // Try sibling path first, then parent path
+                let response = await fetch('./2026 RC 2025.csv');
+                if (!response.ok) {
+                    response = await fetch('../2026 RC 2025.csv');
+                }
                 const csvText = await response.text();
                 
                 Papa.parse(csvText, {
@@ -829,6 +906,7 @@
                     userId: userId,
                     date: parseDate(row.Date),
                     status: categorizeStatus(row.Status),
+                    rawStatus: row.Status ? row.Status.trim() : '',
                     miles: row.Miles ? parseFloat(row.Miles) : null
                 };
             }).filter(row => row.date !== null);
@@ -919,7 +997,7 @@
             const names = [...new Set(data.map(d => d.name))];
             const dates = [...new Set(data.map(d => d.date.toISOString()))];
             
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
             const activeData = data.filter(d => activeStatuses.includes(d.status));
             const completed = activeData.filter(d => d.status === 'Ran 3mi').length;
             const rate = activeData.length > 0 ? (completed / activeData.length * 100).toFixed(1) : 0;
@@ -965,7 +1043,7 @@
             if (charts.completion) charts.completion.destroy();
 
             const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
             
             const stats = names.map(name => {
                 const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
@@ -1152,7 +1230,7 @@
             
             if (charts.trend) charts.trend.destroy();
 
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
             const dateMap = new Map();
             
             data.forEach(d => {
@@ -1255,7 +1333,7 @@
             
             if (charts.status) charts.status.destroy();
 
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
             const counts = {};
             
             data.forEach(d => {
@@ -1521,7 +1599,7 @@
             
             if (charts.monthly) charts.monthly.destroy();
 
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
             const monthMap = new Map();
             
             data.forEach(d => {
@@ -1585,6 +1663,69 @@
                                 color: '#94a3b8',
                                 callback: (value) => value + '%'
                             }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render missed runs chart
+        function renderMissedChart(data) {
+            const ctx = document.getElementById('missedChart').getContext('2d');
+            
+            if (charts.missed) charts.missed.destroy();
+
+            const names = [...new Set(data.map(d => d.name))];
+            
+            const missedStats = names.map(name => {
+                const memberData = data.filter(d => d.name === name);
+                const missed = memberData.filter(d => d.status === 'Did Not Complete').length;
+                const activeWeeks = memberData.filter(d => 
+                    ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'].includes(d.status)
+                ).length;
+                return { name, missed, activeWeeks };
+            });
+            sortByPreference(missedStats, 'missed', true);
+
+            charts.missed = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: missedStats.map(s => s.name),
+                    datasets: [{
+                        label: 'Missed Runs',
+                        data: missedStats.map(s => s.missed),
+                        backgroundColor: missedStats.map(s => {
+                            // More red for more missed
+                            const intensity = Math.min(s.missed / 30, 1);
+                            return `rgba(239, 68, 68, ${0.4 + intensity * 0.5})`;
+                        }),
+                        borderColor: '#ef4444',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const s = missedStats[ctx.dataIndex];
+                                    return `${s.missed} missed out of ${s.activeWeeks} active weeks`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#eaeaea' }
                         }
                     }
                 }
@@ -1668,7 +1809,7 @@
             if (charts.consistency) charts.consistency.destroy();
 
             const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
 
             const consistencyStats = names.map(name => {
                 const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status))
@@ -1739,7 +1880,7 @@
             container.innerHTML = '';
 
             const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
 
             const leaderboardData = names.map(name => {
                 const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
@@ -1828,7 +1969,7 @@
             }
 
             const names = [...new Set(monthData.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
 
             const champions = names.map(name => {
                 const memberData = monthData.filter(d => d.name === name && activeStatuses.includes(d.status));
@@ -1869,7 +2010,7 @@
             const olderDates = dates.slice(Math.max(0, midpoint - 4), midpoint);
 
             const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
 
             const improvements = names.map(name => {
                 const recentData = data.filter(d => 
@@ -1987,12 +2128,307 @@
             });
         }
 
+        // Render Last Week's Leaderboard
+        function renderLastWeekLeaderboard(data) {
+            const container = document.getElementById('lastWeekLeaderboard');
+            container.innerHTML = '';
+
+            // Calculate last week's date range (Monday to Sunday)
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Strip time
+            const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+            
+            // Find the most recent Sunday (end of previous week)
+            // If today is Sunday (0), go back 7 days to get last Sunday
+            // Otherwise, go back dayOfWeek days to get last Sunday
+            const daysSinceLastSunday = dayOfWeek === 0 ? 7 : dayOfWeek;
+            const lastWeekEnd = new Date(today.getTime() - (daysSinceLastSunday * 24 * 60 * 60 * 1000)); // Last Sunday
+            const lastWeekStart = new Date(lastWeekEnd.getTime() - (6 * 24 * 60 * 60 * 1000)); // Monday of that week
+
+            // Filter data for the last week period
+            const lastWeekData = data.filter(d => {
+                const dateOnly = new Date(d.date.getFullYear(), d.date.getMonth(), d.date.getDate());
+                return dateOnly >= lastWeekStart && dateOnly <= lastWeekEnd;
+            });
+
+            if (lastWeekData.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No data for last week</p>';
+                return;
+            }
+
+            // Only include members who were active (not "Not Member" or "No Data") in the last week
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const activeMembers = lastWeekData.filter(d => activeStatuses.includes(d.status));
+
+            if (activeMembers.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No active members last week</p>';
+                return;
+            }
+
+            // Split into completed, excused, and not completed - keep original emoji from CSV
+            const completed = activeMembers.filter(d => d.status === 'Ran 3mi').map(d => ({ name: d.name, rawStatus: d.rawStatus, category: 'completed' }));
+            const excused = activeMembers.filter(d => ['Injured', 'Working', 'Free Pass'].includes(d.status)).map(d => ({ name: d.name, rawStatus: d.rawStatus, category: 'excused' }));
+            const notCompleted = activeMembers.filter(d => d.status === 'Did Not Complete').map(d => ({ name: d.name, rawStatus: d.rawStatus, category: 'notCompleted' }));
+
+            // Combine: completed first, then excused, then not completed
+            const allMembers = [...completed, ...excused, ...notCompleted];
+
+            allMembers.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'mini-leader-item';
+                item.innerHTML = `
+                    <div class="mini-leader-rank"></div>
+                    <div class="mini-leader-name">${member.name}</div>
+                    <div class="mini-leader-value">${member.rawStatus}</div>
+                `;
+                container.appendChild(item);
+            });
+
+            // Add date label at the bottom
+            const dateLabel = document.createElement('div');
+            dateLabel.style.cssText = 'padding: 8px; text-align: center; font-size: 0.8rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.1);';
+            dateLabel.textContent = `${lastWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${lastWeekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            container.appendChild(dateLabel);
+        }
+
+        // Render Last Month's Completion Rate
+        function renderLastMonthLeaderboard(data) {
+            const container = document.getElementById('lastMonthLeaderboard');
+            container.innerHTML = '';
+
+            // Get 4 weeks ending with last week (Monday to Sunday)
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+            
+            // Find last week's Sunday (end of last week)
+            const daysSinceLastSunday = dayOfWeek === 0 ? 7 : dayOfWeek;
+            const lastWeekEnd = new Date(today.getTime() - (daysSinceLastSunday * 24 * 60 * 60 * 1000));
+            const lastWeekStart = new Date(lastWeekEnd.getTime() - (6 * 24 * 60 * 60 * 1000)); // Monday of last week
+            
+            // Go back 3 more weeks from last week's Monday for 4 weeks total
+            const fourWeeksAgo = new Date(lastWeekStart.getTime() - (21 * 24 * 60 * 60 * 1000));
+
+            const monthData = data.filter(d => d.date >= fourWeeksAgo && d.date <= lastWeekEnd);
+
+            if (monthData.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No data for the last 4 weeks</p>';
+                return;
+            }
+
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const names = [...new Set(data.map(d => d.name))];
+
+            // Only include members who joined BEFORE or AT the start of the period (30+ days ago)
+            const stats = names.map(name => {
+                // Find member's first active date (when they joined)
+                const allMemberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (allMemberData.length === 0) return null;
+                
+                const firstActiveDate = new Date(Math.min(...allMemberData.map(d => d.date.getTime())));
+                
+                // Skip members who joined AFTER the start of this period
+                if (firstActiveDate > fourWeeksAgo) return null;
+                
+                // Now calculate their stats for this period
+                const periodData = monthData.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (periodData.length === 0) return null;
+                
+                const completed = periodData.filter(d => d.status === 'Ran 3mi').length;
+                const total = periodData.length;
+                return { name, rate: (completed / total * 100), completed, total };
+            }).filter(s => s !== null)
+              .sort((a, b) => b.rate - a.rate || b.completed - a.completed);
+
+            if (stats.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No members with 4+ weeks of data</p>';
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉'];
+
+            stats.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
+                item.innerHTML = `
+                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
+                    <div class="mini-leader-name">${member.name}</div>
+                    <div class="mini-leader-value">${member.rate.toFixed(0)}%</div>
+                `;
+                container.appendChild(item);
+            });
+
+            // Add date range label
+            const dateLabel = document.createElement('div');
+            dateLabel.style.cssText = 'padding: 8px; text-align: center; font-size: 0.8rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.1);';
+            dateLabel.textContent = `${fourWeeksAgo.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${lastWeekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            container.appendChild(dateLabel);
+        }
+
+        // Render Last Quarter's Completion Rate (90 days)
+        function renderLastQuarterLeaderboard(data) {
+            const container = document.getElementById('lastQuarterLeaderboard');
+            container.innerHTML = '';
+
+            // Get 12 weeks ending with last week (Monday to Sunday)
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+            
+            // Find last week's Sunday (end of last week)
+            const daysSinceLastSunday = dayOfWeek === 0 ? 7 : dayOfWeek;
+            const lastWeekEnd = new Date(today.getTime() - (daysSinceLastSunday * 24 * 60 * 60 * 1000));
+            const lastWeekStart = new Date(lastWeekEnd.getTime() - (6 * 24 * 60 * 60 * 1000)); // Monday of last week
+            
+            // Go back 11 more weeks from last week's Monday for 12 weeks total
+            const twelveWeeksAgo = new Date(lastWeekStart.getTime() - (77 * 24 * 60 * 60 * 1000));
+
+            const quarterData = data.filter(d => d.date >= twelveWeeksAgo && d.date <= lastWeekEnd);
+
+            if (quarterData.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No data for the last 12 weeks</p>';
+                return;
+            }
+
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const names = [...new Set(data.map(d => d.name))];
+
+            // Only include members who joined BEFORE or AT the start of the period (90+ days ago)
+            const stats = names.map(name => {
+                // Find member's first active date (when they joined)
+                const allMemberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (allMemberData.length === 0) return null;
+                
+                const firstActiveDate = new Date(Math.min(...allMemberData.map(d => d.date.getTime())));
+                
+                // Skip members who joined AFTER the start of this period
+                if (firstActiveDate > twelveWeeksAgo) return null;
+                
+                // Now calculate their stats for this period
+                const periodData = quarterData.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (periodData.length === 0) return null;
+                
+                const completed = periodData.filter(d => d.status === 'Ran 3mi').length;
+                const total = periodData.length;
+                return { name, rate: (completed / total * 100), completed, total };
+            }).filter(s => s !== null)
+              .sort((a, b) => b.rate - a.rate || b.completed - a.completed);
+
+            if (stats.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No members with 12+ weeks of data</p>';
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉'];
+
+            stats.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
+                item.innerHTML = `
+                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
+                    <div class="mini-leader-name">${member.name}</div>
+                    <div class="mini-leader-value">${member.rate.toFixed(0)}%</div>
+                `;
+                container.appendChild(item);
+            });
+
+            // Add date range label
+            const dateLabel = document.createElement('div');
+            dateLabel.style.cssText = 'padding: 8px; text-align: center; font-size: 0.8rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.1);';
+            dateLabel.textContent = `${twelveWeeksAgo.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${lastWeekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            container.appendChild(dateLabel);
+        }
+
+        // Render Last Year's Completion Rate
+        function renderLastYearLeaderboard(data) {
+            const container = document.getElementById('lastYearLeaderboard');
+            container.innerHTML = '';
+
+            // Get dates from the last 365 days
+            const now = new Date();
+            const oneYearAgo = new Date(now.getTime() - (365 * 24 * 60 * 60 * 1000));
+            // Window for checking data exists from ~365 days ago (+/- 7 days)
+            const startWindowBegin = new Date(now.getTime() - (372 * 24 * 60 * 60 * 1000)); // 365 + 7 days ago
+            const startWindowEnd = new Date(now.getTime() - (358 * 24 * 60 * 60 * 1000));   // 365 - 7 days ago
+
+            const yearData = data.filter(d => d.date >= oneYearAgo && d.date <= now);
+
+            if (yearData.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No data for the last year</p>';
+                return;
+            }
+
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            const names = [...new Set(data.map(d => d.name))];
+
+            // Only include members who:
+            // 1. Joined BEFORE or AT the start of the period (365+ days ago)
+            // 2. Have data from around 365 days ago (+/- 7 days)
+            const stats = names.map(name => {
+                // Find member's first active date (when they joined)
+                const allMemberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (allMemberData.length === 0) return null;
+                
+                const firstActiveDate = new Date(Math.min(...allMemberData.map(d => d.date.getTime())));
+                
+                // Skip members who joined AFTER the start of this period
+                if (firstActiveDate > oneYearAgo) return null;
+                
+                // Check if member has data from around the start of the period (+/- 7 days)
+                const hasDataFromStart = allMemberData.some(d => 
+                    d.date >= startWindowBegin && d.date <= startWindowEnd
+                );
+                if (!hasDataFromStart) return null;
+                
+                // Now calculate their stats for this period
+                const periodData = yearData.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (periodData.length === 0) return null;
+                
+                const completed = periodData.filter(d => d.status === 'Ran 3mi').length;
+                const total = periodData.length;
+                return { name, rate: (completed / total * 100), completed, total };
+            }).filter(s => s !== null)
+              .sort((a, b) => b.rate - a.rate || b.completed - a.completed);
+
+            if (stats.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No members with 1+ year of data</p>';
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉'];
+
+            stats.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
+                item.innerHTML = `
+                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
+                    <div class="mini-leader-name">${member.name}</div>
+                    <div class="mini-leader-value">${member.rate.toFixed(0)}%</div>
+                `;
+                container.appendChild(item);
+            });
+
+            // Add date range label
+            const dateLabel = document.createElement('div');
+            dateLabel.style.cssText = 'padding: 8px; text-align: center; font-size: 0.8rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.1);';
+            dateLabel.textContent = `${oneYearAgo.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - ${now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+            container.appendChild(dateLabel);
+        }
+
         // Render all charts
         function renderAllCharts() {
             const filteredData = getFilteredData();
             const stats = calculateStats(filteredData);
             
             updateStats(stats);
+            
+            // Time-period charts (always use full processedData, not filtered)
+            renderLastWeekLeaderboard(processedData);
+            renderLastMonthLeaderboard(processedData);
+            renderLastQuarterLeaderboard(processedData);
+            renderLastYearLeaderboard(processedData);
+            
+            // Main charts (use filtered data)
             renderLeaderboard(filteredData);
             renderIronmanLeaderboard(filteredData);
             renderTotalRunsAward(filteredData);
@@ -2003,6 +2439,7 @@
             renderStatusChart(filteredData);
             renderHeatmapChart(filteredData);
             renderMonthlyChart(filteredData);
+            renderMissedChart(filteredData);
             renderTimelineChart(processedData); // Timeline always uses full data
             renderPotChart(filteredData);
             renderConsistencyChart(filteredData);
