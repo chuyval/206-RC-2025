@@ -147,6 +147,8 @@
             border-radius: 16px;
             padding: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
         .card-header {
@@ -181,7 +183,9 @@
         }
 
         .leaderboard-container {
-            max-height: 400px;
+            flex: 1;
+            min-height: 150px;
+            max-height: 500px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -223,7 +227,9 @@
         }
 
         .mini-leaderboard {
-            max-height: 300px;
+            flex: 1;
+            min-height: 150px;
+            max-height: 500px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -274,7 +280,7 @@
 
         .time-period-row {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto 25px auto;
@@ -461,7 +467,7 @@
             }
             
             .leaderboard-container {
-                max-height: 350px;
+                max-height: 400px;
             }
             
             .leaderboard-item {
@@ -482,7 +488,7 @@
             }
             
             .mini-leaderboard {
-                max-height: 250px;
+                max-height: 400px;
             }
             
             .mini-leader-item {
@@ -599,8 +605,16 @@
         </div>
     </div>
 
-    <!-- Time-Period Summary Row (3 columns) -->
+    <!-- ============================================================
+         TIME-PERIOD SUMMARY ROW
+         Row 0: Last Week, Last Month
+         These charts always use full processedData (not filtered)
+         ============================================================ -->
     <div class="time-period-row">
+        <!-- CHART: Last Week
+             Element ID: lastWeekLeaderboard
+             Rendered by: renderLastWeekLeaderboard()
+             Shows members who completed the previous Mon-Sun week -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">📅</span>
@@ -610,6 +624,10 @@
             <div class="mini-leaderboard" id="lastWeekLeaderboard"></div>
         </div>
 
+        <!-- CHART: Last Month
+             Element ID: lastMonthLeaderboard
+             Rendered by: renderLastMonthLeaderboard()
+             Shows completion rate for the past 4 weeks -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🗓️</span>
@@ -618,7 +636,20 @@
             <p class="card-description">Completion rate for the past 4 weeks.</p>
             <div class="mini-leaderboard" id="lastMonthLeaderboard"></div>
         </div>
+    </div>
 
+    <!-- ============================================================
+         MAIN DASHBOARD GRID
+         2-column grid layout for all main charts
+         ============================================================ -->
+    <div class="dashboard-grid">
+
+        <!-- ========== ROW 1: Last Quarter Charts ========== -->
+
+        <!-- CHART: Last Quarter
+             Element ID: lastQuarterLeaderboard
+             Rendered by: renderLastQuarterLeaderboard()
+             Shows completion rate for the past 12 weeks (mini-leaderboard) -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">📊</span>
@@ -628,6 +659,27 @@
             <div class="mini-leaderboard" id="lastQuarterLeaderboard"></div>
         </div>
 
+        <!-- CHART: Last Quarter Completion Rate
+             Element ID: lastQuarterCompletionChart
+             Rendered by: renderLastQuarterCompletionChart()
+             Bar chart ranking members by % for the past 12 weeks -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📊</span>
+                <span class="card-title">Last Quarter Completion Rate</span>
+            </div>
+            <p class="card-description">Bar chart ranking members by % for the past 12 weeks.</p>
+            <div class="chart-container tall">
+                <canvas id="lastQuarterCompletionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ========== ROW 2: Last Year Charts ========== -->
+
+        <!-- CHART: Last Year
+             Element ID: lastYearLeaderboard
+             Rendered by: renderLastYearLeaderboard()
+             Shows completion rate for the past 12 months (mini-leaderboard) -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">📆</span>
@@ -636,40 +688,71 @@
             <p class="card-description">Completion rate for the past 12 months.</p>
             <div class="mini-leaderboard" id="lastYearLeaderboard"></div>
         </div>
-    </div>
 
-    <div class="dashboard-grid">
-        <!-- Row 1: Leaderboard, Completion Rate -->
+        <!-- CHART: Last Year Completion Rate
+             Element ID: lastYearCompletionChart
+             Rendered by: renderLastYearCompletionChart()
+             Bar chart ranking members by % for the past 12 months -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📆</span>
+                <span class="card-title">Last Year Completion Rate</span>
+            </div>
+            <p class="card-description">Bar chart ranking members by % for the past 12 months.</p>
+            <div class="chart-container tall">
+                <canvas id="lastYearCompletionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ========== ROW 3: All Time Leaderboard & Completion Rate ========== -->
+
+        <!-- CHART: All Time Leaderboard
+             Element ID: leaderboard
+             Rendered by: renderLeaderboard()
+             Ranked standings by all time completion rate with medals -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🏆</span>
-                <span class="card-title">Leaderboard</span>
+                <span class="card-title">All Time Leaderboard</span>
             </div>
-            <p class="card-description">Current standings by completion rate.</p>
-            <div class="leaderboard-container" id="leaderboard"></div>
+            <p class="card-description">All time standings by completion rate.</p>
+            <div class="leaderboard-container" id="allTimeLeaderboard"></div>
         </div>
 
+        <!-- CHART: All Time Completion Rate
+             Element ID: allTimeCompletionChart
+             Rendered by: renderAllTimeCompletionChart()
+             Horizontal bar chart ranking members by % of all weeks completed -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">📊</span>
-                <span class="card-title">Completion Rate</span>
+                <span class="card-title">All Time Completion Rate</span>
             </div>
-            <p class="card-description">Ranking of members by % of weeks they completed the 3-mile run.</p>
+            <p class="card-description">Ranking of members by % of all weeks they completed the 3-mile run.</p>
             <div class="chart-container tall">
-                <canvas id="completionChart"></canvas>
+                <canvas id="allTimeCompletionChart"></canvas>
             </div>
         </div>
 
-        <!-- Row 2: Iron Man Award, 3-Mile Streaks -->
+        <!-- ========== ROW 4: Iron Man Award & 3-Mile Streaks ========== -->
+
+        <!-- CHART: Iron Man Award
+             Element ID: ironManAwardLeaderboard
+             Rendered by: renderIronManAward()
+             Shows longest currently active streaks (mini-leaderboard) -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🦾</span>
                 <span class="card-title">Iron Man Award</span>
             </div>
             <p class="card-description">Longest currently active streaks.</p>
-            <div class="mini-leaderboard" id="ironmanLeaderboard"></div>
+            <div class="mini-leaderboard" id="ironManAwardLeaderboard"></div>
         </div>
 
+        <!-- CHART: 3-Mile Streaks
+             Element ID: threeMileStreaksChart
+             Rendered by: renderThreeMileStreaksChart()
+             Bar chart showing longest consecutive weeks completing the run -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🔥</span>
@@ -677,11 +760,16 @@
             </div>
             <p class="card-description">Longest consecutive weeks completing the run. Excused weeks don't break streaks.</p>
             <div class="chart-container tall">
-                <canvas id="streakChart"></canvas>
+                <canvas id="threeMileStreaksChart"></canvas>
             </div>
         </div>
 
-        <!-- Row 3: Total Runs Completed Award, Total Runs Completed -->
+        <!-- ========== ROW 5: Total Runs Completed ========== -->
+
+        <!-- CHART: Total Runs Completed Award
+             Element ID: totalRunsAward
+             Rendered by: renderTotalRunsAward()
+             Top performers by total runs (mini-leaderboard) -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🏅</span>
@@ -691,6 +779,10 @@
             <div class="mini-leaderboard" id="totalRunsAward"></div>
         </div>
 
+        <!-- CHART: Total Runs Completed
+             Element ID: totalRunsCompletedChart
+             Rendered by: renderTotalRunsCompletedChart()
+             Bar chart showing total runs per member -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🏃</span>
@@ -698,11 +790,16 @@
             </div>
             <p class="card-description">Total number of 3-mile runs each member has completed.</p>
             <div class="chart-container tall">
-                <canvas id="totalRunsChart"></canvas>
+                <canvas id="totalRunsCompletedChart"></canvas>
             </div>
         </div>
 
-        <!-- Row 4: Consistency Score, Missed Runs -->
+        <!-- ========== ROW 6: Consistency Score & Missed Runs ========== -->
+
+        <!-- CHART: Consistency Score
+             Element ID: consistencyScoreChart
+             Rendered by: renderConsistencyScoreChart()
+             Bar chart showing back-to-back completion percentage -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🎯</span>
@@ -710,10 +807,11 @@
             </div>
             <p class="card-description">How consistently members show up (higher = more consistent).</p>
             <div class="chart-container tall">
-                <canvas id="consistencyChart"></canvas>
+                <canvas id="consistencyScoreChart"></canvas>
             </div>
         </div>
 
+        <!-- CHART: Missed Runs by Member (HIDDEN)
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">💸</span>
@@ -721,11 +819,17 @@
             </div>
             <p class="card-description">Total weeks each member did not complete the 3-mile run.</p>
             <div class="chart-container tall">
-                <canvas id="missedChart"></canvas>
+                <canvas id="missedRunsChart"></canvas>
             </div>
         </div>
+        -->
 
-        <!-- Row 5: Monthly Summary, Weekly Trend -->
+        <!-- ========== ROW 7: Monthly Summary & Weekly Trend ========== -->
+
+        <!-- CHART: Monthly Summary
+             Element ID: monthlySummaryChart
+             Rendered by: renderMonthlySummaryChart()
+             Bar chart showing completion rate by month -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">📅</span>
@@ -733,10 +837,14 @@
             </div>
             <p class="card-description">Completion rate by month - track improvement over time.</p>
             <div class="chart-container">
-                <canvas id="monthlyChart"></canvas>
+                <canvas id="monthlySummaryChart"></canvas>
             </div>
         </div>
 
+        <!-- CHART: Weekly Completions Trend
+             Element ID: weeklyTrendChart
+             Rendered by: renderWeeklyTrendChart()
+             Bar chart with trend line showing weekly completions -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">📈</span>
@@ -744,11 +852,16 @@
             </div>
             <p class="card-description">How many members completed the 3-mile run each week.</p>
             <div class="chart-container">
-                <canvas id="trendChart"></canvas>
+                <canvas id="weeklyTrendChart"></canvas>
             </div>
         </div>
 
-        <!-- Row 6: Attendance Heatmap (Centered) -->
+        <!-- ========== ROW 8: Attendance Heatmap (Full Width) ========== -->
+
+        <!-- CHART: Attendance Heatmap
+             Element ID: attendanceHeatmapChart
+             Rendered by: renderAttendanceHeatmapChart()
+             Matrix chart showing attendance status for all members over time -->
         <div class="card full-width">
             <div class="card-header">
                 <span class="card-icon">🗓️</span>
@@ -756,11 +869,16 @@
             </div>
             <p class="card-description">Visual timeline of every member's attendance. Green = Ran 3mi, Yellow = Excused, Red = Did not complete, Dark = Not a member.</p>
             <div class="chart-container" style="height: 450px; overflow-x: auto;">
-                <canvas id="heatmapChart"></canvas>
+                <canvas id="attendanceHeatmapChart"></canvas>
             </div>
         </div>
 
-        <!-- Row 7: Join Timeline (Centered) -->
+        <!-- ========== ROW 9: Member Join Timeline (Full Width) ========== -->
+
+        <!-- CHART: Member Join Timeline
+             Element ID: memberJoinTimelineChart
+             Rendered by: renderMemberJoinTimelineChart()
+             Scatter chart showing when each member joined -->
         <div class="card full-width">
             <div class="card-header">
                 <span class="card-icon">👥</span>
@@ -768,11 +886,16 @@
             </div>
             <p class="card-description">When each member joined the running club.</p>
             <div class="chart-container">
-                <canvas id="timelineChart"></canvas>
+                <canvas id="memberJoinTimelineChart"></canvas>
             </div>
         </div>
 
-        <!-- Row 8: Money Pot Tracker, Status Distribution -->
+        <!-- ========== ROW 10: Money Pot Tracker & Status Distribution ========== -->
+
+        <!-- CHART: Money Pot Tracker
+             Element ID: moneyPotTrackerChart
+             Rendered by: renderMoneyPotTrackerChart()
+             Line chart showing cumulative pot money from missed runs -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">💰</span>
@@ -780,10 +903,14 @@
             </div>
             <p class="card-description">Cumulative pot money from missed runs ($5 each).</p>
             <div class="chart-container">
-                <canvas id="potChart"></canvas>
+                <canvas id="moneyPotTrackerChart"></canvas>
             </div>
         </div>
 
+        <!-- CHART: Status Distribution
+             Element ID: statusDistributionChart
+             Rendered by: renderStatusDistributionChart()
+             Doughnut chart showing breakdown of all statuses -->
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">🥧</span>
@@ -791,7 +918,7 @@
             </div>
             <p class="card-description">Breakdown of all statuses across the selected period.</p>
             <div class="chart-container">
-                <canvas id="statusChart"></canvas>
+                <canvas id="statusDistributionChart"></canvas>
             </div>
         </div>
 
@@ -829,12 +956,23 @@
     </div>
 
     <script>
-        // Global data storage
-        let rawData = [];
-        let processedData = [];
-        let charts = {};
+        // ============================================================
+        // GLOBAL DATA STORAGE
+        // ============================================================
+        let rawData = [];       // Raw CSV data from PapaParse
+        let processedData = []; // Processed data with parsed dates and categorized statuses
+        let charts = {};        // Chart.js instances (destroyed and recreated on re-render)
 
-        // Status categorization
+        // ============================================================
+        // UTILITY FUNCTIONS
+        // ============================================================
+
+        /**
+         * Categorize CSV status values into standardized categories
+         * Used by all chart rendering functions
+         * @param {string} status - Raw status from CSV (emoji or text)
+         * @returns {string} - Categorized status: 'Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass', 'Not Member', or 'No Data'
+         */
         function categorizeStatus(status) {
             if (!status || status.trim() === '') return 'No Data';
             status = status.trim();
@@ -847,7 +985,11 @@
             return 'No Data';
         }
 
-        // Parse date from MM/DD/YY format
+        /**
+         * Parse date string from CSV (MM/DD/YY format) into Date object
+         * @param {string} dateStr - Date string in MM/DD/YY format
+         * @returns {Date|null} - Parsed Date object or null if invalid
+         */
         function parseDate(dateStr) {
             if (!dateStr) return null;
             const parts = dateStr.split('/');
@@ -858,7 +1000,11 @@
             return new Date(year, month, day);
         }
 
-        // Clean name (handle both old "1. Name" format and new clean format)
+        /**
+         * Clean member name (handles both old "1. Name" format and new clean format)
+         * @param {string} name - Raw name from CSV
+         * @returns {string} - Cleaned name
+         */
         function cleanName(name) {
             if (!name) return '';
             // Check for old format "1. Name"
@@ -866,7 +1012,14 @@
             return match ? match[1].trim() : name.trim();
         }
 
-        // Load and process CSV
+        // ============================================================
+        // DATA LOADING AND PROCESSING
+        // ============================================================
+
+        /**
+         * Load CSV data from file and initialize the dashboard
+         * Tries sibling path first (./), then parent path (../)
+         */
         async function loadData() {
             try {
                 // Try sibling path first, then parent path
@@ -892,10 +1045,13 @@
             }
         }
 
-        // Map of name to UserID for sorting
+        // Map of member name to UserID for sorting by roster order
         let userIdMap = {};
 
-        // Process raw data into usable format
+        /**
+         * Process raw CSV data into structured format
+         * Populates processedData array and userIdMap
+         */
         function processData() {
             processedData = rawData.map(row => {
                 const name = cleanName(row.Name);
@@ -912,13 +1068,26 @@
             }).filter(row => row.date !== null);
         }
 
-        // Get current sort preference
+        // ============================================================
+        // SORTING AND FILTERING UTILITIES
+        // ============================================================
+
+        /**
+         * Get current sort preference from dropdown
+         * @returns {string} - 'ranking' or 'userId'
+         */
         function getSortPreference() {
             const sortSelect = document.getElementById('sortOrder');
             return sortSelect ? sortSelect.value : 'ranking';
         }
 
-        // Sort helper: sorts array of objects with 'name' and a ranking value
+        /**
+         * Sort array of objects by user preference (ranking or userId)
+         * @param {Array} items - Array of objects with 'name' property
+         * @param {string} rankingKey - Property name to sort by when using ranking
+         * @param {boolean} rankingDesc - Sort descending if true (default)
+         * @returns {Array} - Sorted array
+         */
         function sortByPreference(items, rankingKey, rankingDesc = true) {
             const sortPref = getSortPreference();
             if (sortPref === 'userId') {
@@ -931,7 +1100,10 @@
             }
         }
 
-        // Get filtered data based on current selections
+        /**
+         * Get filtered data based on current timeframe selection
+         * @returns {Array} - Filtered processedData array
+         */
         function getFilteredData() {
             const timeframe = document.getElementById('timeframe').value;
             
@@ -957,7 +1129,10 @@
             });
         }
 
-        // Setup filter dropdowns
+        /**
+         * Setup filter dropdowns and event listeners
+         * Handles timeframe selection and custom date range
+         */
         function setupFilters() {
             // Set date range defaults for custom filter
             const dates = processedData.map(d => d.date).filter(d => d);
@@ -992,7 +1167,15 @@
             toggleCustomDates();
         }
 
-        // Calculate statistics
+        // ============================================================
+        // STATISTICS CALCULATION
+        // ============================================================
+
+        /**
+         * Calculate overall statistics for the stats bar
+         * @param {Array} data - Filtered data array
+         * @returns {Object} - { members, weeks, rate, bestStreak }
+         */
         function calculateStats(data) {
             const names = [...new Set(data.map(d => d.name))];
             const dates = [...new Set(data.map(d => d.date.toISOString()))];
@@ -1020,7 +1203,10 @@
             return { members: names.length, weeks: dates.length, rate, bestStreak };
         }
 
-        // Update stats display
+        /**
+         * Update the stats bar display with calculated values
+         * @param {Object} stats - Statistics object from calculateStats()
+         */
         function updateStats(stats) {
             document.getElementById('statMembers').textContent = stats.members;
             document.getElementById('statWeeks').textContent = stats.weeks;
@@ -1036,1099 +1222,20 @@
             }
         }
 
-        // Render completion rate chart
-        function renderCompletionChart(data) {
-            const ctx = document.getElementById('completionChart').getContext('2d');
-            
-            if (charts.completion) charts.completion.destroy();
-
-            const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-            
-            const stats = names.map(name => {
-                const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
-                const completed = memberData.filter(d => d.status === 'Ran 3mi').length;
-                const total = memberData.length;
-                return { name, rate: total > 0 ? (completed / total * 100) : 0, completed, total };
-            });
-            sortByPreference(stats, 'rate', true);
-
-            charts.completion = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: stats.map(s => s.name),
-                    datasets: [{
-                        label: 'Completion Rate %',
-                        data: stats.map(s => s.rate),
-                        backgroundColor: stats.map(s => {
-                            const hue = (s.rate / 100) * 120; // 0=red, 120=green
-                            return `hsla(${hue}, 70%, 50%, 0.8)`;
-                        }),
-                        borderColor: stats.map(s => {
-                            const hue = (s.rate / 100) * 120;
-                            return `hsla(${hue}, 70%, 40%, 1)`;
-                        }),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const s = stats[ctx.dataIndex];
-                                    return `${s.rate.toFixed(1)}% (${s.completed}/${s.total} weeks)`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            max: 100,
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#eaeaea' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render streak chart
-        function renderStreakChart(data) {
-            const ctx = document.getElementById('streakChart').getContext('2d');
-            
-            if (charts.streak) charts.streak.destroy();
-
-            const names = [...new Set(data.map(d => d.name))];
-            
-            const streaks = names.map(name => {
-                const memberData = data.filter(d => d.name === name).sort((a, b) => a.date - b.date);
-                let maxStreak = 0;
-                let currentStreak = 0;
-                
-                memberData.forEach(d => {
-                    if (d.status === 'Ran 3mi') {
-                        currentStreak++;
-                        maxStreak = Math.max(maxStreak, currentStreak);
-                    } else if (d.status === 'Did Not Complete') {
-                        currentStreak = 0;
-                    }
-                    // Injured, Working, Free Pass don't break streak
-                });
-                
-                return { name, streak: maxStreak };
-            });
-            sortByPreference(streaks, 'streak', true);
-
-            charts.streak = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: streaks.map(s => s.name),
-                    datasets: [{
-                        label: 'Consecutive Weeks',
-                        data: streaks.map(s => s.streak),
-                        backgroundColor: 'rgba(124, 58, 237, 0.7)',
-                        borderColor: 'rgba(124, 58, 237, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => `${ctx.raw} consecutive weeks`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#eaeaea' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render total runs completed chart
-        function renderTotalRunsChart(data) {
-            const ctx = document.getElementById('totalRunsChart').getContext('2d');
-            
-            if (charts.totalRuns) charts.totalRuns.destroy();
-
-            const names = [...new Set(data.map(d => d.name))];
-            
-            const runStats = names.map(name => {
-                const memberData = data.filter(d => d.name === name);
-                const totalRuns = memberData.filter(d => d.status === 'Ran 3mi').length;
-                return { name, totalRuns };
-            });
-            sortByPreference(runStats, 'totalRuns', true);
-
-            const maxRuns = Math.max(...runStats.map(s => s.totalRuns));
-
-            charts.totalRuns = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: runStats.map(s => s.name),
-                    datasets: [{
-                        label: 'Total Runs',
-                        data: runStats.map(s => s.totalRuns),
-                        backgroundColor: runStats.map(s => {
-                            const intensity = s.totalRuns / maxRuns;
-                            return `rgba(34, 197, 94, ${0.4 + intensity * 0.5})`;
-                        }),
-                        borderColor: '#22c55e',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => `${ctx.raw} runs completed`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#eaeaea' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render weekly trend chart (Bar chart with trend line)
-        function renderTrendChart(data) {
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            
-            if (charts.trend) charts.trend.destroy();
-
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-            const dateMap = new Map();
-            
-            data.forEach(d => {
-                if (!activeStatuses.includes(d.status)) return;
-                const dateKey = d.date.toISOString().split('T')[0];
-                if (!dateMap.has(dateKey)) {
-                    dateMap.set(dateKey, { date: d.date, completed: 0, total: 0 });
-                }
-                const entry = dateMap.get(dateKey);
-                entry.total++;
-                if (d.status === 'Ran 3mi') entry.completed++;
-            });
-
-            const weeklyData = Array.from(dateMap.values()).sort((a, b) => a.date - b.date);
-            
-            // Calculate trend line using linear regression
-            const n = weeklyData.length;
-            const xValues = weeklyData.map((_, i) => i);
-            const yValues = weeklyData.map(w => w.completed);
-            
-            const sumX = xValues.reduce((a, b) => a + b, 0);
-            const sumY = yValues.reduce((a, b) => a + b, 0);
-            const sumXY = xValues.reduce((acc, x, i) => acc + x * yValues[i], 0);
-            const sumXX = xValues.reduce((acc, x) => acc + x * x, 0);
-            
-            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-            const intercept = (sumY - slope * sumX) / n;
-            
-            const trendData = xValues.map(x => slope * x + intercept);
-
-            charts.trend = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: weeklyData.map(w => w.date),
-                    datasets: [
-                        {
-                            label: 'Members Who Ran 3mi',
-                            data: weeklyData.map(w => w.completed),
-                            backgroundColor: 'rgba(0, 212, 255, 0.7)',
-                            borderColor: 'rgba(0, 212, 255, 1)',
-                            borderWidth: 1,
-                            order: 2
-                        },
-                        {
-                            label: `Trend (${slope > 0 ? '+' : ''}${slope.toFixed(2)}/week)`,
-                            data: trendData,
-                            type: 'line',
-                            borderColor: '#ff6b6b',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            fill: false,
-                            order: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { 
-                            labels: { color: '#eaeaea' }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                title: (ctx) => {
-                                    const date = weeklyData[ctx[0].dataIndex]?.date;
-                                    return date ? date.toLocaleDateString() : '';
-                                },
-                                label: (ctx) => {
-                                    if (ctx.dataset.label.startsWith('Trend')) {
-                                        return `Trend: ${ctx.raw.toFixed(1)}`;
-                                    }
-                                    const w = weeklyData[ctx.dataIndex];
-                                    return `${w.completed}/${w.total} members completed`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: 'month' },
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render status distribution chart
-        function renderStatusChart(data) {
-            const ctx = document.getElementById('statusChart').getContext('2d');
-            
-            if (charts.status) charts.status.destroy();
-
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-            const counts = {};
-            
-            data.forEach(d => {
-                if (activeStatuses.includes(d.status)) {
-                    counts[d.status] = (counts[d.status] || 0) + 1;
-                }
-            });
-
-            const colors = {
-                'Ran 3mi': '#4ade80',
-                'Did Not Complete': '#f87171',
-                'Injured': '#fbbf24',
-                'Working': '#60a5fa',
-                'Free Pass': '#a78bfa'
-            };
-
-            const labels = Object.keys(counts);
-            const values = Object.values(counts);
-
-            charts.status = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: labels.map(l => colors[l] || '#gray'),
-                        borderWidth: 2,
-                        borderColor: '#1a1a2e'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: { color: '#eaeaea', padding: 15 }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const total = values.reduce((a, b) => a + b, 0);
-                                    const pct = ((ctx.raw / total) * 100).toFixed(1);
-                                    return `${ctx.label}: ${ctx.raw} (${pct}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render member join timeline
-        function renderTimelineChart(data) {
-            const ctx = document.getElementById('timelineChart').getContext('2d');
-            
-            if (charts.timeline) charts.timeline.destroy();
-
-            const names = [...new Set(data.map(d => d.name))];
-            const joinDates = [];
-
-            names.forEach(name => {
-                const memberData = data.filter(d => d.name === name).sort((a, b) => a.date - b.date);
-                const firstActive = memberData.find(d => d.status !== 'Not Member' && d.status !== 'No Data');
-                if (firstActive) {
-                    joinDates.push({ name, date: firstActive.date });
-                }
-            });
-
-            joinDates.sort((a, b) => a.date - b.date);
-
-            charts.timeline = new Chart(ctx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Join Date',
-                        data: joinDates.map((j, i) => ({ x: j.date, y: i, name: j.name })),
-                        backgroundColor: '#f472b6',
-                        borderColor: '#ffffff',
-                        borderWidth: 1,
-                        pointRadius: 5,
-                        pointHoverRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const j = joinDates[ctx.dataIndex];
-                                    return `${j.name} joined ${j.date.toLocaleDateString()}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: 'month' },
-                            grid: { 
-                                color: 'rgba(255,255,255,0.3)',
-                                lineWidth: 1
-                            },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            type: 'linear',
-                            min: -0.5,
-                            max: joinDates.length - 0.5,
-                            grid: { 
-                                color: 'rgba(255,255,255,0.15)',
-                                lineWidth: 1
-                            },
-                            ticks: {
-                                color: '#eaeaea',
-                                autoSkip: false,
-                                stepSize: 1,
-                                callback: (value) => {
-                                    const index = Math.round(value);
-                                    return joinDates[index]?.name || '';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Sort names array by preference (for heatmap and other name lists)
-        function sortNamesByPreference(namesArray) {
-            const sortPref = getSortPreference();
-            if (sortPref === 'userId') {
-                return namesArray.sort((a, b) => (userIdMap[a] || 999) - (userIdMap[b] || 999));
-            } else {
-                // Default alphabetical for ranking since heatmap doesn't have a metric
-                return namesArray.sort();
-            }
-        }
-
-        // Render attendance heatmap
-        function renderHeatmapChart(data) {
-            const ctx = document.getElementById('heatmapChart').getContext('2d');
-            
-            if (charts.heatmap) charts.heatmap.destroy();
-
-            const names = sortNamesByPreference([...new Set(data.map(d => d.name))]);
-            const dates = [...new Set(data.map(d => d.date.toISOString().split('T')[0]))].sort();
-            
-            // Create a lookup map
-            const dataMap = new Map();
-            data.forEach(d => {
-                const key = `${d.name}-${d.date.toISOString().split('T')[0]}`;
-                dataMap.set(key, d.status);
-            });
-
-            // Status to color mapping
-            const statusColors = {
-                'Ran 3mi': '#22c55e',
-                'Did Not Complete': '#ef4444',
-                'Injured': '#fbbf24',
-                'Working': '#60a5fa',
-                'Free Pass': '#a78bfa',
-                'Not Member': '#1f2937',
-                'No Data': '#1f2937'
-            };
-
-            // Build matrix data
-            const matrixData = [];
-            names.forEach((name, y) => {
-                dates.forEach((date, x) => {
-                    const key = `${name}-${date}`;
-                    const status = dataMap.get(key) || 'No Data';
-                    matrixData.push({
-                        x: x,
-                        y: y,
-                        v: status,
-                        date: date,
-                        name: name
-                    });
-                });
-            });
-
-            charts.heatmap = new Chart(ctx, {
-                type: 'matrix',
-                data: {
-                    datasets: [{
-                        label: 'Attendance',
-                        data: matrixData,
-                        backgroundColor: (ctx) => {
-                            const value = ctx.dataset.data[ctx.dataIndex];
-                            return statusColors[value?.v] || '#1f2937';
-                        },
-                        borderColor: '#1a1a2e',
-                        borderWidth: 1,
-                        width: ({ chart }) => (chart.chartArea || {}).width / dates.length - 1,
-                        height: ({ chart }) => (chart.chartArea || {}).height / names.length - 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                title: () => '',
-                                label: (ctx) => {
-                                    const d = ctx.dataset.data[ctx.dataIndex];
-                                    return `${d.name} - ${new Date(d.date).toLocaleDateString()}: ${d.v}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            min: -0.5,
-                            max: dates.length - 0.5,
-                            grid: { display: false },
-                            ticks: {
-                                color: '#94a3b8',
-                                maxRotation: 45,
-                                autoSkip: false,
-                                stepSize: 1,
-                                callback: (value) => {
-                                    const index = Math.round(value);
-                                    // Show every Nth date based on total count
-                                    const showEvery = Math.max(1, Math.ceil(dates.length / 12));
-                                    if (index >= 0 && index < dates.length && index % showEvery === 0) {
-                                        const d = new Date(dates[index]);
-                                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                    }
-                                    return '';
-                                }
-                            }
-                        },
-                        y: {
-                            type: 'linear',
-                            min: -0.5,
-                            max: names.length - 0.5,
-                            grid: { display: false },
-                            ticks: {
-                                color: '#eaeaea',
-                                autoSkip: false,
-                                stepSize: 1,
-                                callback: (value) => {
-                                    const index = Math.round(value);
-                                    return names[index] || '';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render monthly summary chart
-        function renderMonthlyChart(data) {
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            
-            if (charts.monthly) charts.monthly.destroy();
-
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-            const monthMap = new Map();
-            
-            data.forEach(d => {
-                if (!activeStatuses.includes(d.status)) return;
-                const monthKey = `${d.date.getFullYear()}-${String(d.date.getMonth() + 1).padStart(2, '0')}`;
-                if (!monthMap.has(monthKey)) {
-                    monthMap.set(monthKey, { month: monthKey, completed: 0, total: 0 });
-                }
-                const entry = monthMap.get(monthKey);
-                entry.total++;
-                if (d.status === 'Ran 3mi') entry.completed++;
-            });
-
-            const monthlyData = Array.from(monthMap.values()).sort((a, b) => a.month.localeCompare(b.month));
-            const rates = monthlyData.map(m => m.total > 0 ? (m.completed / m.total * 100) : 0);
-
-            charts.monthly = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: monthlyData.map(m => {
-                        const [year, month] = m.month.split('-');
-                        return new Date(year, month - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-                    }),
-                    datasets: [{
-                        label: 'Completion Rate %',
-                        data: rates,
-                        backgroundColor: rates.map(r => {
-                            const hue = (r / 100) * 120;
-                            return `hsla(${hue}, 70%, 50%, 0.7)`;
-                        }),
-                        borderColor: rates.map(r => {
-                            const hue = (r / 100) * 120;
-                            return `hsla(${hue}, 70%, 40%, 1)`;
-                        }),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const m = monthlyData[ctx.dataIndex];
-                                    return `${rates[ctx.dataIndex].toFixed(1)}% (${m.completed}/${m.total})`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            max: 100,
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { 
-                                color: '#94a3b8',
-                                callback: (value) => value + '%'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render missed runs chart
-        function renderMissedChart(data) {
-            const ctx = document.getElementById('missedChart').getContext('2d');
-            
-            if (charts.missed) charts.missed.destroy();
-
-            const names = [...new Set(data.map(d => d.name))];
-            
-            const missedStats = names.map(name => {
-                const memberData = data.filter(d => d.name === name);
-                const missed = memberData.filter(d => d.status === 'Did Not Complete').length;
-                const activeWeeks = memberData.filter(d => 
-                    ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'].includes(d.status)
-                ).length;
-                return { name, missed, activeWeeks };
-            });
-            sortByPreference(missedStats, 'missed', true);
-
-            charts.missed = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: missedStats.map(s => s.name),
-                    datasets: [{
-                        label: 'Missed Runs',
-                        data: missedStats.map(s => s.missed),
-                        backgroundColor: missedStats.map(s => {
-                            // More red for more missed
-                            const intensity = Math.min(s.missed / 30, 1);
-                            return `rgba(239, 68, 68, ${0.4 + intensity * 0.5})`;
-                        }),
-                        borderColor: '#ef4444',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const s = missedStats[ctx.dataIndex];
-                                    return `${s.missed} missed out of ${s.activeWeeks} active weeks`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#eaeaea' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render money pot tracker
-        function renderPotChart(data) {
-            const ctx = document.getElementById('potChart').getContext('2d');
-            
-            if (charts.pot) charts.pot.destroy();
-
-            // Group by week and count missed runs
-            const weekMap = new Map();
-            data.forEach(d => {
-                if (d.status === 'Did Not Complete') {
-                    const weekKey = d.date.toISOString().split('T')[0];
-                    weekMap.set(weekKey, (weekMap.get(weekKey) || 0) + 1);
-                }
-            });
-
-            const weeks = Array.from(weekMap.entries())
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .map(([date, count]) => ({ date: new Date(date), count }));
-
-            // Calculate cumulative pot
-            let cumulative = 0;
-            const potData = weeks.map(w => {
-                cumulative += w.count * 5;
-                return { x: w.date, y: cumulative };
-            });
-
-            charts.pot = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'Pot Total ($)',
-                        data: potData,
-                        borderColor: '#fbbf24',
-                        backgroundColor: 'rgba(251, 191, 36, 0.2)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#fbbf24'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => `Total pot: $${ctx.raw.y}`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: 'week' },
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { 
-                                color: '#94a3b8',
-                                callback: (value) => '$' + value
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render consistency score chart
-        function renderConsistencyChart(data) {
-            const ctx = document.getElementById('consistencyChart').getContext('2d');
-            
-            if (charts.consistency) charts.consistency.destroy();
-
-            const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-
-            const consistencyStats = names.map(name => {
-                const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status))
-                    .sort((a, b) => a.date - b.date);
-                
-                if (memberData.length < 2) return { name, score: 0 };
-
-                // Calculate consistency: percentage of consecutive weeks with same status (Ran 3mi)
-                let consistentWeeks = 0;
-                for (let i = 1; i < memberData.length; i++) {
-                    if (memberData[i].status === 'Ran 3mi' && memberData[i-1].status === 'Ran 3mi') {
-                        consistentWeeks++;
-                    }
-                }
-                const score = (consistentWeeks / (memberData.length - 1)) * 100;
-                return { name, score: Math.round(score) };
-            });
-            sortByPreference(consistencyStats, 'score', true);
-
-            charts.consistency = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: consistencyStats.map(s => s.name),
-                    datasets: [{
-                        label: 'Consistency %',
-                        data: consistencyStats.map(s => s.score),
-                        backgroundColor: consistencyStats.map(s => {
-                            const hue = 280 - (s.score / 100) * 80; // Purple to blue
-                            return `hsla(${hue}, 70%, 50%, 0.8)`;
-                        }),
-                        borderColor: '#a78bfa',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => `${ctx.raw}% back-to-back completions`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            max: 100,
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { 
-                                color: '#94a3b8',
-                                callback: (value) => value + '%'
-                            }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#eaeaea' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Render leaderboard
-        function renderLeaderboard(data) {
-            const container = document.getElementById('leaderboard');
-            container.innerHTML = '';
-
-            const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-
-            const leaderboardData = names.map(name => {
-                const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
-                const completed = memberData.filter(d => d.status === 'Ran 3mi').length;
-                const total = memberData.length;
-                const rate = total > 0 ? (completed / total * 100) : 0;
-                const missed = memberData.filter(d => d.status === 'Did Not Complete').length;
-                return { name, rate, completed, total, missed };
-            }).sort((a, b) => b.rate - a.rate || b.completed - a.completed);
-
-            const medals = ['🥇', '🥈', '🥉'];
-
-            leaderboardData.forEach((member, index) => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                
-                const rank = index < 3 ? medals[index] : `#${index + 1}`;
-                
-                item.innerHTML = `
-                    <div class="leaderboard-rank">${rank}</div>
-                    <div class="leaderboard-name">${member.name}</div>
-                    <div class="leaderboard-stats">
-                        <div class="rate">${member.rate.toFixed(1)}%</div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Render This Week's Leaders
-        function renderWeeklyLeaderboard(data) {
-            const container = document.getElementById('weeklyLeaderboard');
-            container.innerHTML = '';
-
-            // Get the most recent week
-            const dates = [...new Set(data.map(d => d.date.toISOString().split('T')[0]))].sort();
-            if (dates.length === 0) {
-                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No data available</p>';
-                return;
-            }
-            
-            const latestWeek = dates[dates.length - 1];
-            const weekData = data.filter(d => d.date.toISOString().split('T')[0] === latestWeek);
-            
-            const leaders = weekData
-                .filter(d => d.status === 'Ran 3mi')
-                .map(d => d.name);
-            
-            const medals = ['🥇', '🥈', '🥉'];
-            
-            if (leaders.length === 0) {
-                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No completions this week yet</p>';
-                return;
-            }
-
-            leaders.forEach((name, index) => {
-                const item = document.createElement('div');
-                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
-                item.innerHTML = `
-                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
-                    <div class="mini-leader-name">${name}</div>
-                    <div class="mini-leader-value">✅</div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Render Monthly Champions
-        function renderMonthlyLeaderboard(data) {
-            const container = document.getElementById('monthlyLeaderboard');
-            container.innerHTML = '';
-
-            // Get current month data
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
-            
-            const monthData = data.filter(d => 
-                d.date.getMonth() === currentMonth && 
-                d.date.getFullYear() === currentYear
-            );
-
-            if (monthData.length === 0) {
-                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No data for this month</p>';
-                return;
-            }
-
-            const names = [...new Set(monthData.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-
-            const champions = names.map(name => {
-                const memberData = monthData.filter(d => d.name === name && activeStatuses.includes(d.status));
-                const completed = memberData.filter(d => d.status === 'Ran 3mi').length;
-                const total = memberData.length;
-                return { name, completed, total, rate: total > 0 ? (completed / total * 100) : 0 };
-            }).filter(m => m.total > 0)
-              .sort((a, b) => b.rate - a.rate || b.completed - a.completed);
-
-            const medals = ['🥇', '🥈', '🥉'];
-
-            champions.forEach((member, index) => {
-                const item = document.createElement('div');
-                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
-                item.innerHTML = `
-                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
-                    <div class="mini-leader-name">${member.name}</div>
-                    <div class="mini-leader-value">${member.rate.toFixed(0)}%</div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Render Most Improved
-        function renderImprovedLeaderboard(data) {
-            const container = document.getElementById('improvedLeaderboard');
-            container.innerHTML = '';
-
-            const dates = [...new Set(data.map(d => d.date.toISOString().split('T')[0]))].sort();
-            if (dates.length < 8) {
-                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">Need more data for comparison</p>';
-                return;
-            }
-
-            // Compare last 4 weeks vs previous 4 weeks
-            const midpoint = Math.floor(dates.length / 2);
-            const recentDates = dates.slice(-Math.min(4, dates.length));
-            const olderDates = dates.slice(Math.max(0, midpoint - 4), midpoint);
-
-            const names = [...new Set(data.map(d => d.name))];
-            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
-
-            const improvements = names.map(name => {
-                const recentData = data.filter(d => 
-                    d.name === name && 
-                    recentDates.includes(d.date.toISOString().split('T')[0]) &&
-                    activeStatuses.includes(d.status)
-                );
-                const olderData = data.filter(d => 
-                    d.name === name && 
-                    olderDates.includes(d.date.toISOString().split('T')[0]) &&
-                    activeStatuses.includes(d.status)
-                );
-
-                const recentRate = recentData.length > 0 
-                    ? (recentData.filter(d => d.status === 'Ran 3mi').length / recentData.length * 100) 
-                    : 0;
-                const olderRate = olderData.length > 0 
-                    ? (olderData.filter(d => d.status === 'Ran 3mi').length / olderData.length * 100) 
-                    : 0;
-
-                return { name, improvement: recentRate - olderRate, recentRate, olderRate };
-            }).filter(m => m.olderRate > 0 || m.recentRate > 0)
-              .sort((a, b) => b.improvement - a.improvement)
-              .slice(0, 5);
-
-            improvements.forEach((member, index) => {
-                const item = document.createElement('div');
-                const isPositive = member.improvement >= 0;
-                item.className = 'mini-leader-item' + (index === 0 && isPositive ? ' highlight' : '');
-                item.innerHTML = `
-                    <div class="mini-leader-rank">${index + 1}</div>
-                    <div class="mini-leader-name">${member.name}</div>
-                    <div class="mini-leader-value ${isPositive ? 'improvement-positive' : 'improvement-negative'}">
-                        ${isPositive ? '↑' : '↓'} ${Math.abs(member.improvement).toFixed(0)}%
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Render Iron Man Award (Longest Active Streaks)
-        function renderIronmanLeaderboard(data) {
-            const container = document.getElementById('ironmanLeaderboard');
-            container.innerHTML = '';
-
-            const names = [...new Set(data.map(d => d.name))];
-            
-            const activeStreaks = names.map(name => {
-                const memberData = data.filter(d => d.name === name).sort((a, b) => b.date - a.date);
-                
-                let currentStreak = 0;
-                for (const d of memberData) {
-                    if (d.status === 'Ran 3mi') {
-                        currentStreak++;
-                    } else if (d.status === 'Did Not Complete') {
-                        break; // Streak broken
-                    }
-                    // Injured, Working, Free Pass don't break streak but don't add to it
-                }
-                
-                return { name, streak: currentStreak };
-            }).filter(m => m.streak > 0)
-              .sort((a, b) => b.streak - a.streak)
-              .slice(0, 5);
-
-            if (activeStreaks.length === 0) {
-                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No active streaks</p>';
-                return;
-            }
-
-            const medals = ['🥇', '🥈', '🥉'];
-
-            activeStreaks.forEach((member, index) => {
-                const item = document.createElement('div');
-                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
-                item.innerHTML = `
-                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
-                    <div class="mini-leader-name">${member.name}</div>
-                    <div class="mini-leader-value">🔥 ${member.streak} wk${member.streak > 1 ? 's' : ''}</div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Render Total Runs Completed Award
-        function renderTotalRunsAward(data) {
-            const container = document.getElementById('totalRunsAward');
-            container.innerHTML = '';
-
-            const names = [...new Set(data.map(d => d.name))];
-            
-            const runStats = names.map(name => {
-                const memberData = data.filter(d => d.name === name);
-                const totalRuns = memberData.filter(d => d.status === 'Ran 3mi').length;
-                return { name, totalRuns };
-            }).filter(m => m.totalRuns > 0)
-              .sort((a, b) => b.totalRuns - a.totalRuns);
-
-            if (runStats.length === 0) {
-                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No runs completed yet</p>';
-                return;
-            }
-
-            const medals = ['🥇', '🥈', '🥉'];
-
-            runStats.forEach((member, index) => {
-                const item = document.createElement('div');
-                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
-                item.innerHTML = `
-                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
-                    <div class="mini-leader-name">${member.name}</div>
-                    <div class="mini-leader-value">🏃 ${member.totalRuns}</div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Render Last Week's Leaderboard
+        // ============================================================
+        // CHART RENDERING FUNCTIONS
+        // Ordered to match HTML display order (top to bottom, left to right)
+        // ============================================================
+
+        // -------------------- ROW 0: Last Week, Last Month --------------------
+
+        /**
+         * CHART: Last Week
+         * Element ID: lastWeekLeaderboard
+         * Type: Mini-leaderboard
+         * Shows: Members who completed the previous Mon-Sun week's run
+         * Date Logic: Calculates previous full week (Mon-Sun before current week)
+         */
         function renderLastWeekLeaderboard(data) {
             const container = document.getElementById('lastWeekLeaderboard');
             container.innerHTML = '';
@@ -2191,7 +1298,14 @@
             container.appendChild(dateLabel);
         }
 
-        // Render Last Month's Completion Rate
+        /**
+         * CHART: Last Month
+         * Element ID: lastMonthLeaderboard
+         * Type: Mini-leaderboard
+         * Shows: Completion rate for the past 4 weeks
+         * Date Logic: 4 weeks ending with last full week (Mon-Sun)
+         * Eligibility: Members who joined before the start of the 4-week period
+         */
         function renderLastMonthLeaderboard(data) {
             const container = document.getElementById('lastMonthLeaderboard');
             container.innerHTML = '';
@@ -2245,13 +1359,11 @@
                 return;
             }
 
-            const medals = ['🥇', '🥈', '🥉'];
-
             stats.forEach((member, index) => {
                 const item = document.createElement('div');
-                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
+                item.className = 'mini-leader-item';
                 item.innerHTML = `
-                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
+                    <div class="mini-leader-rank"></div>
                     <div class="mini-leader-name">${member.name}</div>
                     <div class="mini-leader-value">${member.rate.toFixed(0)}%</div>
                 `;
@@ -2265,7 +1377,16 @@
             container.appendChild(dateLabel);
         }
 
-        // Render Last Quarter's Completion Rate (90 days)
+        // -------------------- ROW 1: Last Quarter, Last Quarter Completion Rate --------------------
+
+        /**
+         * CHART: Last Quarter
+         * Element ID: lastQuarterLeaderboard
+         * Type: Mini-leaderboard
+         * Shows: Completion rate for the past 12 weeks
+         * Date Logic: 12 weeks ending with last full week (Mon-Sun)
+         * Eligibility: Members who joined before the start of the 12-week period
+         */
         function renderLastQuarterLeaderboard(data) {
             const container = document.getElementById('lastQuarterLeaderboard');
             container.innerHTML = '';
@@ -2339,7 +1460,106 @@
             container.appendChild(dateLabel);
         }
 
-        // Render Last Year's Completion Rate
+        /**
+         * CHART: Last Quarter Completion Rate
+         * Element ID: lastQuarterCompletionChart
+         * Type: Horizontal bar chart
+         * Shows: Ranking of members by % for the past 12 weeks
+         * Note: Uses processedData (not filtered) - calculates own date range
+         */
+        function renderLastQuarterCompletionChart(data) {
+            const ctx = document.getElementById('lastQuarterCompletionChart').getContext('2d');
+            
+            if (charts.lastQuarterCompletion) charts.lastQuarterCompletion.destroy();
+
+            // Get 12 weeks ending with last week (same logic as renderLastQuarterLeaderboard)
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const dayOfWeek = today.getDay();
+            const daysSinceLastSunday = dayOfWeek === 0 ? 7 : dayOfWeek;
+            const lastWeekEnd = new Date(today.getTime() - (daysSinceLastSunday * 24 * 60 * 60 * 1000));
+            const lastWeekStart = new Date(lastWeekEnd.getTime() - (6 * 24 * 60 * 60 * 1000));
+            const twelveWeeksAgo = new Date(lastWeekStart.getTime() - (77 * 24 * 60 * 60 * 1000));
+
+            const quarterData = data.filter(d => d.date >= twelveWeeksAgo && d.date <= lastWeekEnd);
+
+            const names = [...new Set(data.map(d => d.name))];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            
+            const stats = names.map(name => {
+                const allMemberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (allMemberData.length === 0) return null;
+                
+                const firstActiveDate = new Date(Math.min(...allMemberData.map(d => d.date.getTime())));
+                if (firstActiveDate > twelveWeeksAgo) return null;
+                
+                const periodData = quarterData.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (periodData.length === 0) return null;
+                
+                const completed = periodData.filter(d => d.status === 'Ran 3mi').length;
+                const total = periodData.length;
+                return { name, rate: total > 0 ? (completed / total * 100) : 0, completed, total };
+            }).filter(s => s !== null);
+            sortByPreference(stats, 'rate', true);
+
+            charts.lastQuarterCompletion = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: stats.map(s => s.name),
+                    datasets: [{
+                        label: 'Completion Rate %',
+                        data: stats.map(s => s.rate),
+                        backgroundColor: stats.map(s => {
+                            const hue = (s.rate / 100) * 120;
+                            return `hsla(${hue}, 70%, 50%, 0.8)`;
+                        }),
+                        borderColor: stats.map(s => {
+                            const hue = (s.rate / 100) * 120;
+                            return `hsla(${hue}, 70%, 40%, 1)`;
+                        }),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const s = stats[ctx.dataIndex];
+                                    return `${s.rate.toFixed(1)}% (${s.completed}/${s.total} weeks)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#eaeaea' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // -------------------- ROW 2: Last Year, Last Year Completion Rate --------------------
+
+        /**
+         * CHART: Last Year
+         * Element ID: lastYearLeaderboard
+         * Type: Mini-leaderboard
+         * Shows: Completion rate for the past 12 months (365 days)
+         * Date Logic: 365 days from today
+         * Eligibility: Members who joined 365+ days ago AND have data from ~365 days ago (+/- 7 days)
+         */
         function renderLastYearLeaderboard(data) {
             const container = document.getElementById('lastYearLeaderboard');
             container.innerHTML = '';
@@ -2415,37 +1635,576 @@
             container.appendChild(dateLabel);
         }
 
-        // Render all charts
+        /**
+         * CHART: Last Year Completion Rate
+         * Element ID: lastYearCompletionChart
+         * Type: Horizontal bar chart
+         * Shows: Ranking of members by % for the past 12 months
+         * Note: Uses processedData (not filtered) - calculates own date range
+         */
+        function renderLastYearCompletionChart(data) {
+            const ctx = document.getElementById('lastYearCompletionChart').getContext('2d');
+            
+            if (charts.lastYearCompletion) charts.lastYearCompletion.destroy();
+
+            // Get dates from the last 365 days (same logic as renderLastYearLeaderboard)
+            const now = new Date();
+            const oneYearAgo = new Date(now.getTime() - (365 * 24 * 60 * 60 * 1000));
+            const startWindowBegin = new Date(now.getTime() - (372 * 24 * 60 * 60 * 1000));
+            const startWindowEnd = new Date(now.getTime() - (358 * 24 * 60 * 60 * 1000));
+
+            const yearData = data.filter(d => d.date >= oneYearAgo && d.date <= now);
+
+            const names = [...new Set(data.map(d => d.name))];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working', 'Free Pass'];
+            
+            const stats = names.map(name => {
+                const allMemberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (allMemberData.length === 0) return null;
+                
+                const firstActiveDate = new Date(Math.min(...allMemberData.map(d => d.date.getTime())));
+                if (firstActiveDate > oneYearAgo) return null;
+                
+                const hasDataFromStart = allMemberData.some(d => 
+                    d.date >= startWindowBegin && d.date <= startWindowEnd
+                );
+                if (!hasDataFromStart) return null;
+                
+                const periodData = yearData.filter(d => d.name === name && activeStatuses.includes(d.status));
+                if (periodData.length === 0) return null;
+                
+                const completed = periodData.filter(d => d.status === 'Ran 3mi').length;
+                const total = periodData.length;
+                return { name, rate: total > 0 ? (completed / total * 100) : 0, completed, total };
+            }).filter(s => s !== null);
+            sortByPreference(stats, 'rate', true);
+
+            charts.lastYearCompletion = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: stats.map(s => s.name),
+                    datasets: [{
+                        label: 'Completion Rate %',
+                        data: stats.map(s => s.rate),
+                        backgroundColor: stats.map(s => {
+                            const hue = (s.rate / 100) * 120;
+                            return `hsla(${hue}, 70%, 50%, 0.8)`;
+                        }),
+                        borderColor: stats.map(s => {
+                            const hue = (s.rate / 100) * 120;
+                            return `hsla(${hue}, 70%, 40%, 1)`;
+                        }),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const s = stats[ctx.dataIndex];
+                                    return `${s.rate.toFixed(1)}% (${s.completed}/${s.total} weeks)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#eaeaea' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // -------------------- ROW 3: All Time Leaderboard, All Time Completion Rate --------------------
+
+        /**
+         * CHART: All Time Leaderboard
+         * Element ID: allTimeLeaderboard
+         * Type: HTML list with medals
+         * Shows: Ranked standings by all time completion rate
+         */
+        function renderAllTimeLeaderboard(data) {
+            const container = document.getElementById('allTimeLeaderboard');
+            container.innerHTML = '';
+
+            const names = [...new Set(data.map(d => d.name))];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
+
+            const leaderboardData = names.map(name => {
+                const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
+                const completed = memberData.filter(d => d.status === 'Ran 3mi').length;
+                const total = memberData.length;
+                const rate = total > 0 ? (completed / total * 100) : 0;
+                const missed = memberData.filter(d => d.status === 'Did Not Complete').length;
+                return { name, rate, completed, total, missed };
+            }).sort((a, b) => b.rate - a.rate || b.completed - a.completed);
+
+            const medals = ['🥇', '🥈', '🥉'];
+
+            leaderboardData.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                
+                const rank = index < 3 ? medals[index] : `#${index + 1}`;
+                
+                item.innerHTML = `
+                    <div class="leaderboard-rank">${rank}</div>
+                    <div class="leaderboard-name">${member.name}</div>
+                    <div class="leaderboard-stats">
+                        <div class="rate">${member.rate.toFixed(1)}%</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        /**
+         * CHART: All Time Completion Rate
+         * Element ID: allTimeCompletionChart
+         * Type: Horizontal bar chart
+         * Shows: Ranking of members by % of all weeks they completed the 3-mile run
+         */
+        function renderAllTimeCompletionChart(data) {
+            const ctx = document.getElementById('allTimeCompletionChart').getContext('2d');
+            
+            if (charts.allTimeCompletion) charts.allTimeCompletion.destroy();
+
+            const names = [...new Set(data.map(d => d.name))];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
+            
+            const stats = names.map(name => {
+                const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status));
+                const completed = memberData.filter(d => d.status === 'Ran 3mi').length;
+                const total = memberData.length;
+                return { name, rate: total > 0 ? (completed / total * 100) : 0, completed, total };
+            });
+            sortByPreference(stats, 'rate', true);
+
+            charts.allTimeCompletion = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: stats.map(s => s.name),
+                    datasets: [{
+                        label: 'Completion Rate %',
+                        data: stats.map(s => s.rate),
+                        backgroundColor: stats.map(s => {
+                            const hue = (s.rate / 100) * 120; // 0=red, 120=green
+                            return `hsla(${hue}, 70%, 50%, 0.8)`;
+                        }),
+                        borderColor: stats.map(s => {
+                            const hue = (s.rate / 100) * 120;
+                            return `hsla(${hue}, 70%, 40%, 1)`;
+                        }),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const s = stats[ctx.dataIndex];
+                                    return `${s.rate.toFixed(1)}% (${s.completed}/${s.total} weeks)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#eaeaea' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // -------------------- ROW 4: Iron Man Award, 3-Mile Streaks --------------------
+
+        /**
+         * CHART: Iron Man Award
+         * Element ID: ironManAwardLeaderboard
+         * Type: Mini-leaderboard
+         * Shows: Longest currently active streaks (consecutive completions from most recent)
+         */
+        function renderIronManAward(data) {
+            const container = document.getElementById('ironManAwardLeaderboard');
+            container.innerHTML = '';
+
+            const names = [...new Set(data.map(d => d.name))];
+            
+            const activeStreaks = names.map(name => {
+                const memberData = data.filter(d => d.name === name).sort((a, b) => b.date - a.date);
+                let currentStreak = 0;
+                for (const d of memberData) {
+                    if (d.status === 'Ran 3mi') {
+                        currentStreak++;
+                    } else if (d.status === 'Did Not Complete') {
+                        break;
+                    }
+                }
+                return { name, streak: currentStreak };
+            }).filter(m => m.streak > 0)
+              .sort((a, b) => b.streak - a.streak)
+              .slice(0, 5);
+
+            if (activeStreaks.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No active streaks</p>';
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉'];
+            activeStreaks.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
+                item.innerHTML = `
+                    <div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div>
+                    <div class="mini-leader-name">${member.name}</div>
+                    <div class="mini-leader-value">🔥 ${member.streak} wk${member.streak > 1 ? 's' : ''}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        /**
+         * CHART: 3-Mile Streaks
+         * Element ID: threeMileStreaksChart
+         * Type: Horizontal bar chart
+         * Shows: Longest consecutive weeks completing the run per member
+         */
+        function renderThreeMileStreaksChart(data) {
+            const ctx = document.getElementById('threeMileStreaksChart').getContext('2d');
+            if (charts.threeMileStreaks) charts.threeMileStreaks.destroy();
+
+            const names = [...new Set(data.map(d => d.name))];
+            const streaks = names.map(name => {
+                const memberData = data.filter(d => d.name === name).sort((a, b) => a.date - b.date);
+                let maxStreak = 0, currentStreak = 0;
+                memberData.forEach(d => {
+                    if (d.status === 'Ran 3mi') { currentStreak++; maxStreak = Math.max(maxStreak, currentStreak); }
+                    else if (d.status === 'Did Not Complete') { currentStreak = 0; }
+                });
+                return { name, streak: maxStreak };
+            });
+            sortByPreference(streaks, 'streak', true);
+
+            charts.threeMileStreaks = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: streaks.map(s => s.name), datasets: [{ label: 'Consecutive Weeks', data: streaks.map(s => s.streak), backgroundColor: 'rgba(124, 58, 237, 0.7)', borderColor: 'rgba(124, 58, 237, 1)', borderWidth: 1 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.raw} consecutive weeks` } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { color: '#eaeaea' } } } }
+            });
+        }
+
+        // -------------------- ROW 5: Total Runs Completed Award, Total Runs Completed --------------------
+
+        /**
+         * CHART: Total Runs Completed Award
+         * Element ID: totalRunsAward
+         * Type: Mini-leaderboard
+         */
+        function renderTotalRunsAward(data) {
+            const container = document.getElementById('totalRunsAward');
+            container.innerHTML = '';
+            const names = [...new Set(data.map(d => d.name))];
+            const runStats = names.map(name => ({ name, totalRuns: data.filter(d => d.name === name && d.status === 'Ran 3mi').length }))
+                .filter(m => m.totalRuns > 0).sort((a, b) => b.totalRuns - a.totalRuns);
+            if (runStats.length === 0) { container.innerHTML = '<p style="padding: 20px; color: #94a3b8;">No runs completed yet</p>'; return; }
+            const medals = ['🥇', '🥈', '🥉'];
+            runStats.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'mini-leader-item' + (index === 0 ? ' highlight' : '');
+                item.innerHTML = `<div class="mini-leader-rank">${index < 3 ? medals[index] : `#${index + 1}`}</div><div class="mini-leader-name">${member.name}</div><div class="mini-leader-value">🏃 ${member.totalRuns}</div>`;
+                container.appendChild(item);
+            });
+        }
+
+        /**
+         * CHART: Total Runs Completed
+         * Element ID: totalRunsCompletedChart
+         * Type: Horizontal bar chart
+         */
+        function renderTotalRunsCompletedChart(data) {
+            const ctx = document.getElementById('totalRunsCompletedChart').getContext('2d');
+            if (charts.totalRunsCompleted) charts.totalRunsCompleted.destroy();
+            const names = [...new Set(data.map(d => d.name))];
+            const runStats = names.map(name => ({ name, totalRuns: data.filter(d => d.name === name && d.status === 'Ran 3mi').length }));
+            sortByPreference(runStats, 'totalRuns', true);
+            const maxRuns = Math.max(...runStats.map(s => s.totalRuns));
+            charts.totalRunsCompleted = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: runStats.map(s => s.name), datasets: [{ label: 'Total Runs', data: runStats.map(s => s.totalRuns), backgroundColor: runStats.map(s => `rgba(34, 197, 94, ${0.4 + (s.totalRuns / maxRuns) * 0.5})`), borderColor: '#22c55e', borderWidth: 1 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.raw} runs completed` } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { color: '#eaeaea' } } } }
+            });
+        }
+
+        // -------------------- ROW 6: Consistency Score, Missed Runs --------------------
+
+        /**
+         * CHART: Consistency Score
+         * Element ID: consistencyScoreChart
+         */
+        function renderConsistencyScoreChart(data) {
+            const ctx = document.getElementById('consistencyScoreChart').getContext('2d');
+            if (charts.consistencyScore) charts.consistencyScore.destroy();
+            const names = [...new Set(data.map(d => d.name))];
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
+            const consistencyStats = names.map(name => {
+                const memberData = data.filter(d => d.name === name && activeStatuses.includes(d.status)).sort((a, b) => a.date - b.date);
+                if (memberData.length < 2) return { name, score: 0 };
+                let consistentWeeks = 0;
+                for (let i = 1; i < memberData.length; i++) { if (memberData[i].status === 'Ran 3mi' && memberData[i-1].status === 'Ran 3mi') consistentWeeks++; }
+                return { name, score: Math.round((consistentWeeks / (memberData.length - 1)) * 100) };
+            });
+            sortByPreference(consistencyStats, 'score', true);
+            charts.consistencyScore = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: consistencyStats.map(s => s.name), datasets: [{ label: 'Consistency %', data: consistencyStats.map(s => s.score), backgroundColor: consistencyStats.map(s => `hsla(${280 - (s.score / 100) * 80}, 70%, 50%, 0.8)`), borderColor: '#a78bfa', borderWidth: 1 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.raw}% back-to-back completions` } } }, scales: { x: { max: 100, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8', callback: (v) => v + '%' } }, y: { grid: { display: false }, ticks: { color: '#eaeaea' } } } }
+            });
+        }
+
+        /**
+         * CHART: Missed Runs by Member
+         * Element ID: missedRunsChart
+         */
+        function renderMissedRunsChart(data) {
+            const ctx = document.getElementById('missedRunsChart').getContext('2d');
+            if (charts.missedRuns) charts.missedRuns.destroy();
+            const names = [...new Set(data.map(d => d.name))];
+            const missedStats = names.map(name => {
+                const memberData = data.filter(d => d.name === name);
+                return { name, missed: memberData.filter(d => d.status === 'Did Not Complete').length, activeWeeks: memberData.filter(d => ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'].includes(d.status)).length };
+            });
+            sortByPreference(missedStats, 'missed', true);
+            charts.missedRuns = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: missedStats.map(s => s.name), datasets: [{ label: 'Missed Runs', data: missedStats.map(s => s.missed), backgroundColor: missedStats.map(s => `rgba(239, 68, 68, ${0.4 + Math.min(s.missed / 30, 1) * 0.5})`), borderColor: '#ef4444', borderWidth: 1 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => { const s = missedStats[ctx.dataIndex]; return `${s.missed} missed out of ${s.activeWeeks} active weeks`; } } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { color: '#eaeaea' } } } }
+            });
+        }
+
+        // -------------------- ROW 7: Monthly Summary, Weekly Trend --------------------
+
+        /**
+         * CHART: Monthly Summary
+         * Element ID: monthlySummaryChart
+         */
+        function renderMonthlySummaryChart(data) {
+            const ctx = document.getElementById('monthlySummaryChart').getContext('2d');
+            if (charts.monthlySummary) charts.monthlySummary.destroy();
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
+            const monthMap = new Map();
+            data.forEach(d => { if (!activeStatuses.includes(d.status)) return; const monthKey = `${d.date.getFullYear()}-${String(d.date.getMonth() + 1).padStart(2, '0')}`; if (!monthMap.has(monthKey)) monthMap.set(monthKey, { month: monthKey, completed: 0, total: 0 }); const entry = monthMap.get(monthKey); entry.total++; if (d.status === 'Ran 3mi') entry.completed++; });
+            const monthlyData = Array.from(monthMap.values()).sort((a, b) => a.month.localeCompare(b.month));
+            const rates = monthlyData.map(m => m.total > 0 ? (m.completed / m.total * 100) : 0);
+            charts.monthlySummary = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: monthlyData.map(m => { const [year, month] = m.month.split('-'); return new Date(year, month - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }); }), datasets: [{ label: 'Completion Rate %', data: rates, backgroundColor: rates.map(r => `hsla(${(r / 100) * 120}, 70%, 50%, 0.7)`), borderColor: rates.map(r => `hsla(${(r / 100) * 120}, 70%, 40%, 1)`), borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => { const m = monthlyData[ctx.dataIndex]; return `${rates[ctx.dataIndex].toFixed(1)}% (${m.completed}/${m.total})`; } } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }, y: { max: 100, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8', callback: (v) => v + '%' } } } }
+            });
+        }
+
+        /**
+         * CHART: Weekly Completions Trend
+         * Element ID: weeklyTrendChart
+         */
+        function renderWeeklyTrendChart(data) {
+            const ctx = document.getElementById('weeklyTrendChart').getContext('2d');
+            if (charts.weeklyTrend) charts.weeklyTrend.destroy();
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
+            const dateMap = new Map();
+            data.forEach(d => { if (!activeStatuses.includes(d.status)) return; const dateKey = d.date.toISOString().split('T')[0]; if (!dateMap.has(dateKey)) dateMap.set(dateKey, { date: d.date, completed: 0, total: 0 }); const entry = dateMap.get(dateKey); entry.total++; if (d.status === 'Ran 3mi') entry.completed++; });
+            const weeklyData = Array.from(dateMap.values()).sort((a, b) => a.date - b.date);
+            const n = weeklyData.length; const xValues = weeklyData.map((_, i) => i); const yValues = weeklyData.map(w => w.completed);
+            const sumX = xValues.reduce((a, b) => a + b, 0); const sumY = yValues.reduce((a, b) => a + b, 0);
+            const sumXY = xValues.reduce((acc, x, i) => acc + x * yValues[i], 0); const sumXX = xValues.reduce((acc, x) => acc + x * x, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX); const intercept = (sumY - slope * sumX) / n;
+            const trendData = xValues.map(x => slope * x + intercept);
+            charts.weeklyTrend = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: weeklyData.map(w => w.date), datasets: [{ label: 'Members Who Ran 3mi', data: weeklyData.map(w => w.completed), backgroundColor: 'rgba(0, 212, 255, 0.7)', borderColor: 'rgba(0, 212, 255, 1)', borderWidth: 1, order: 2 }, { label: `Trend (${slope > 0 ? '+' : ''}${slope.toFixed(2)}/week)`, data: trendData, type: 'line', borderColor: '#ff6b6b', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, order: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#eaeaea' } }, tooltip: { callbacks: { title: (ctx) => weeklyData[ctx[0].dataIndex]?.date?.toLocaleDateString() || '', label: (ctx) => { if (ctx.dataset.label.startsWith('Trend')) return `Trend: ${ctx.raw.toFixed(1)}`; const w = weeklyData[ctx.dataIndex]; return `${w.completed}/${w.total} members completed`; } } } }, scales: { x: { type: 'time', time: { unit: 'month' }, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }, y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } } } }
+            });
+        }
+
+        // -------------------- ROW 8: Attendance Heatmap (Full Width) --------------------
+
+        function sortNamesByPreference(namesArray) {
+            const sortPref = getSortPreference();
+            return sortPref === 'userId' ? namesArray.sort((a, b) => (userIdMap[a] || 999) - (userIdMap[b] || 999)) : namesArray.sort();
+        }
+
+        /**
+         * CHART: Attendance Heatmap
+         * Element ID: attendanceHeatmapChart
+         */
+        function renderAttendanceHeatmapChart(data) {
+            const ctx = document.getElementById('attendanceHeatmapChart').getContext('2d');
+            if (charts.attendanceHeatmap) charts.attendanceHeatmap.destroy();
+            const names = sortNamesByPreference([...new Set(data.map(d => d.name))]);
+            const dates = [...new Set(data.map(d => d.date.toISOString().split('T')[0]))].sort();
+            const dataMap = new Map(); data.forEach(d => { dataMap.set(`${d.name}-${d.date.toISOString().split('T')[0]}`, d.status); });
+            const statusColors = { 'Ran 3mi': '#22c55e', 'Did Not Complete': '#ef4444', 'Injured': '#fbbf24', 'Working': '#60a5fa', 'Free Pass': '#a78bfa', 'Not Member': '#1f2937', 'No Data': '#1f2937' };
+            const matrixData = []; names.forEach((name, y) => { dates.forEach((date, x) => { matrixData.push({ x, y, v: dataMap.get(`${name}-${date}`) || 'No Data', date, name }); }); });
+            charts.attendanceHeatmap = new Chart(ctx, {
+                type: 'matrix',
+                data: { datasets: [{ label: 'Attendance', data: matrixData, backgroundColor: (ctx) => statusColors[ctx.dataset.data[ctx.dataIndex]?.v] || '#1f2937', borderColor: '#1a1a2e', borderWidth: 1, width: ({ chart }) => (chart.chartArea || {}).width / dates.length - 1, height: ({ chart }) => (chart.chartArea || {}).height / names.length - 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { title: () => '', label: (ctx) => { const d = ctx.dataset.data[ctx.dataIndex]; return `${d.name} - ${new Date(d.date).toLocaleDateString()}: ${d.v}`; } } } }, scales: { x: { type: 'linear', min: -0.5, max: dates.length - 0.5, grid: { display: false }, ticks: { color: '#94a3b8', maxRotation: 45, autoSkip: false, stepSize: 1, callback: (value) => { const index = Math.round(value); const showEvery = Math.max(1, Math.ceil(dates.length / 12)); if (index >= 0 && index < dates.length && index % showEvery === 0) return new Date(dates[index]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); return ''; } } }, y: { type: 'linear', min: -0.5, max: names.length - 0.5, grid: { display: false }, ticks: { color: '#eaeaea', autoSkip: false, stepSize: 1, callback: (value) => names[Math.round(value)] || '' } } } }
+            });
+        }
+
+        // -------------------- ROW 9: Member Join Timeline (Full Width) --------------------
+
+        /**
+         * CHART: Member Join Timeline
+         * Element ID: memberJoinTimelineChart
+         */
+        function renderMemberJoinTimelineChart(data) {
+            const ctx = document.getElementById('memberJoinTimelineChart').getContext('2d');
+            if (charts.memberJoinTimeline) charts.memberJoinTimeline.destroy();
+            const names = [...new Set(data.map(d => d.name))];
+            const joinDates = [];
+            names.forEach(name => { const memberData = data.filter(d => d.name === name).sort((a, b) => a.date - b.date); const firstActive = memberData.find(d => d.status !== 'Not Member' && d.status !== 'No Data'); if (firstActive) joinDates.push({ name, date: firstActive.date }); });
+            joinDates.sort((a, b) => a.date - b.date);
+            charts.memberJoinTimeline = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: [{ label: 'Join Date', data: joinDates.map((j, i) => ({ x: j.date, y: i, name: j.name })), backgroundColor: '#f472b6', borderColor: '#ffffff', borderWidth: 1, pointRadius: 5, pointHoverRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => { const j = joinDates[ctx.dataIndex]; return `${j.name} joined ${j.date.toLocaleDateString()}`; } } } }, scales: { x: { type: 'time', time: { unit: 'month' }, grid: { color: 'rgba(255,255,255,0.3)', lineWidth: 1 }, ticks: { color: '#94a3b8' } }, y: { type: 'linear', min: -0.5, max: joinDates.length - 0.5, grid: { color: 'rgba(255,255,255,0.15)', lineWidth: 1 }, ticks: { color: '#eaeaea', autoSkip: false, stepSize: 1, callback: (value) => joinDates[Math.round(value)]?.name || '' } } } }
+            });
+        }
+
+        // -------------------- ROW 10: Money Pot Tracker, Status Distribution --------------------
+
+        /**
+         * CHART: Money Pot Tracker
+         * Element ID: moneyPotTrackerChart
+         */
+        function renderMoneyPotTrackerChart(data) {
+            const ctx = document.getElementById('moneyPotTrackerChart').getContext('2d');
+            if (charts.moneyPotTracker) charts.moneyPotTracker.destroy();
+            const weekMap = new Map(); data.forEach(d => { if (d.status === 'Did Not Complete') { const weekKey = d.date.toISOString().split('T')[0]; weekMap.set(weekKey, (weekMap.get(weekKey) || 0) + 1); } });
+            const weeks = Array.from(weekMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([date, count]) => ({ date: new Date(date), count }));
+            let cumulative = 0; const potData = weeks.map(w => { cumulative += w.count * 5; return { x: w.date, y: cumulative }; });
+            charts.moneyPotTracker = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: [{ label: 'Pot Total ($)', data: potData, borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.2)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#fbbf24' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `Total pot: $${ctx.raw.y}` } } }, scales: { x: { type: 'time', time: { unit: 'week' }, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8', callback: (v) => '$' + v } } } }
+            });
+        }
+
+        /**
+         * CHART: Status Distribution
+         * Element ID: statusDistributionChart
+         */
+        function renderStatusDistributionChart(data) {
+            const ctx = document.getElementById('statusDistributionChart').getContext('2d');
+            if (charts.statusDistribution) charts.statusDistribution.destroy();
+            const activeStatuses = ['Ran 3mi', 'Did Not Complete', 'Injured', 'Working'];
+            const counts = {}; data.forEach(d => { if (activeStatuses.includes(d.status)) counts[d.status] = (counts[d.status] || 0) + 1; });
+            const colors = { 'Ran 3mi': '#4ade80', 'Did Not Complete': '#f87171', 'Injured': '#fbbf24', 'Working': '#60a5fa', 'Free Pass': '#a78bfa' };
+            const labels = Object.keys(counts); const values = Object.values(counts);
+            charts.statusDistribution = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data: values, backgroundColor: labels.map(l => colors[l] || '#gray'), borderWidth: 2, borderColor: '#1a1a2e' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#eaeaea', padding: 15 } }, tooltip: { callbacks: { label: (ctx) => { const total = values.reduce((a, b) => a + b, 0); return `${ctx.label}: ${ctx.raw} (${((ctx.raw / total) * 100).toFixed(1)}%)`; } } } } }
+            });
+        }
+
+        // -------------------- UNUSED FUNCTIONS --------------------
+
+        function renderThisWeekLeaders(data) { /* UNUSED */ }
+        function renderMonthlyChampions(data) { /* UNUSED */ }
+        function renderMostImproved(data) { /* UNUSED */ }
+
+        // ============================================================
+        // MAIN RENDER FUNCTION
+        // Orchestrates rendering of all charts
+        // ============================================================
+
+        /**
+         * Render all charts in the dashboard
+         * Called on initial load and when filters change
+         * 
+         * Chart rendering is split into two categories:
+         * 1. Time-period charts: Always use full processedData (not affected by timeframe filter)
+         * 2. Main charts: Use filteredData based on selected timeframe
+         */
         function renderAllCharts() {
             const filteredData = getFilteredData();
             const stats = calculateStats(filteredData);
             
             updateStats(stats);
             
-            // Time-period charts (always use full processedData, not filtered)
-            renderLastWeekLeaderboard(processedData);
-            renderLastMonthLeaderboard(processedData);
-            renderLastQuarterLeaderboard(processedData);
-            renderLastYearLeaderboard(processedData);
+            // ========== CHARTS IN DISPLAY ORDER ==========
+            // Functions are called in the same order they appear in the HTML
             
-            // Main charts (use filtered data)
-            renderLeaderboard(filteredData);
-            renderIronmanLeaderboard(filteredData);
-            renderTotalRunsAward(filteredData);
-            renderCompletionChart(filteredData);
-            renderStreakChart(filteredData);
-            renderTotalRunsChart(filteredData);
-            renderTrendChart(filteredData);
-            renderStatusChart(filteredData);
-            renderHeatmapChart(filteredData);
-            renderMonthlyChart(filteredData);
-            renderMissedChart(filteredData);
-            renderTimelineChart(processedData); // Timeline always uses full data
-            renderPotChart(filteredData);
-            renderConsistencyChart(filteredData);
+            // Row 0: Last Week, Last Month (time-period row, uses processedData)
+            renderLastWeekLeaderboard(processedData);         // #lastWeekLeaderboard
+            renderLastMonthLeaderboard(processedData);        // #lastMonthLeaderboard
+            
+            // Row 1: Last Quarter, Last Quarter Completion Rate (uses processedData)
+            renderLastQuarterLeaderboard(processedData);      // #lastQuarterLeaderboard
+            renderLastQuarterCompletionChart(processedData);  // #lastQuarterCompletionChart
+            
+            // Row 2: Last Year, Last Year Completion Rate (uses processedData)
+            renderLastYearLeaderboard(processedData);         // #lastYearLeaderboard
+            renderLastYearCompletionChart(processedData);     // #lastYearCompletionChart
+            
+            // Row 3: All Time Leaderboard, All Time Completion Rate
+            renderAllTimeLeaderboard(filteredData);           // #allTimeLeaderboard
+            renderAllTimeCompletionChart(filteredData);       // #allTimeCompletionChart
+            
+            // Row 4: Iron Man Award, 3-Mile Streaks
+            renderIronManAward(filteredData);                 // #ironManAwardLeaderboard
+            renderThreeMileStreaksChart(filteredData);        // #threeMileStreaksChart
+            
+            // Row 5: Total Runs Completed Award, Total Runs Completed
+            renderTotalRunsAward(filteredData);               // #totalRunsAward
+            renderTotalRunsCompletedChart(filteredData);      // #totalRunsCompletedChart
+            
+            // Row 6: Consistency Score
+            renderConsistencyScoreChart(filteredData);        // #consistencyScoreChart
+            // renderMissedRunsChart(filteredData);           // #missedRunsChart (HIDDEN)
+            
+            // Row 7: Monthly Summary, Weekly Trend
+            renderMonthlySummaryChart(filteredData);          // #monthlySummaryChart
+            renderWeeklyTrendChart(filteredData);             // #weeklyTrendChart
+            
+            // Row 8: Attendance Heatmap (full width)
+            renderAttendanceHeatmapChart(filteredData);       // #attendanceHeatmapChart
+            
+            // Row 9: Member Join Timeline (full width, uses processedData)
+            renderMemberJoinTimelineChart(processedData);     // #memberJoinTimelineChart
+            
+            // Row 10: Money Pot Tracker, Status Distribution
+            renderMoneyPotTrackerChart(filteredData);         // #moneyPotTrackerChart
+            renderStatusDistributionChart(filteredData);      // #statusDistributionChart
         }
 
-        // Initialize
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
         loadData();
     </script>
 </body>
